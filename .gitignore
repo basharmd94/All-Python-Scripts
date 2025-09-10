@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+email_folder/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pyo
+*.pyd
+*.env
+.env
+.env.local
+*.egg-info/
+*.egg
+*.log
+*.sqlite3
+*.db
+*.db-journal
+*.ipynb_checkpoints
+# VS Code
+.vscode/
+# Mac
+.DS_Store
+# Windows
+Thumbs.db
+# Excel files
+*.xlsx
+*.xls
+*.xlsm
+*.xlsb
+# CSV files
+*.csv
+*.html
+*.xml

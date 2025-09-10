@@ -1,0 +1,156 @@
+from sqlalchemy import create_engine
+import pandas as pd
+import numpy as np
+from datetime import date,datetime,timedelta
+import psycopg2
+import time
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+
+main_time = time.time()
+
+
+def create_order_report(zid,today_date):
+    start_time = time.time()
+    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
+    df_order = pd.read_sql("""SELECT opodt.zid,opord.xdate,opodt.xitem,caitem.xdesc,SUM(opodt.xqtyord)as order_qty , SUM (opodt.xdtwotax) as total_value\n
+                            FROM opodt\n
+                            JOIN opord\n
+                            ON opodt.xordernum = opord.xordernum\n
+                            JOIN caitem\n
+                            ON caitem.xitem = opodt.xitem\n
+                            WHERE opodt.zid = '%s'\n
+                            AND opord.zid = '%s'\n
+                            AND caitem.zid = '%s'\n
+                            AND opord.xdate >='%s'\n
+                            GROUP BY opodt.zid,opord.xdate,opodt.xitem,caitem.xdesc
+                            ORDER BY order_qty DESC""" % (zid,zid,zid,today_date), con = engine)
+    end_time = time.time()
+    return df_order
+
+zid_hmbr = 100001
+zid_zepto = 100005
+zid_gicorp = 100000
+thisdate = datetime.now().date().strftime("%Y-%m-%d")
+#thisdate = '2021-09-22'
+
+df_hmbr = create_order_report(zid_hmbr, thisdate)
+df_zepto = create_order_report(zid_zepto, thisdate)
+df_gicorp = create_order_report(zid_gicorp, thisdate)
+
+df_hmbr['xitem2'] = pd.Categorical(df_hmbr['xitem'], ["1779", "1780", "1281", "0787", "1280", "1005", "17220", "1100", "0788", "01990", "1787", "1176", "11721", "1777"], ordered=True)
+df_test = df_hmbr.sort_values("xitem2")
+conditions = [df_test['xitem'].eq(df_test['xitem2'])]
+choices = [df_test['xitem']]
+df_test['xitem3'] = np.select(conditions, choices, default=df_test['xitem'])
+del df_test['xitem']
+del df_test['xitem2']
+
+df_test = df_test[['xitem3','xdesc','order_qty' , 'total_value']]
+
+df_test.sort_values(by=['total_value'], inplace=True, ascending= False)
+df_zepto.sort_values(by=['total_value'], inplace=True, ascending= False)
+df_gicorp.sort_values(by=['total_value'], inplace=True, ascending= False)
+
+
+
+writer = pd.ExcelWriter('dailyOrderReport.xls')
+df_test.to_excel(writer,'order_hmbr')
+df_zepto.to_excel(writer,'order_zepto')
+df_gicorp.to_excel(writer,'order_gicorp')
+writer.save()
+writer.close()
+
+me = "pythonhmbr12@gmail.com"
+you = ["asaddat87@gmail.com","admhmbr@gmail.com","fixitbdonline@gmail.com","ithmbrbd@gmail.com"]
+
+msg = MIMEMultipart('alternative')
+msg['Subject'] = "Daily Order Report"
+msg['From'] = me
+msg['To'] = ", ".join(you)
+
+HEADER = '''
+<html>
+    <head>
+    <style>
+    /* Style for the table */
+    .dataframe {
+        font-family: Arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+    
+    /* Style for table header */
+    .dataframe th {
+        background-color: #f2f2f2;
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+    
+    /* Style for table data */
+    .dataframe td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+    
+    /* Style for alternate rows */
+    .dataframe tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+</style>
+    </head>
+    <body>
+'''
+FOOTER = '''
+    </body>
+</html>
+'''
+with open('DailyOrderReport.html', 'w') as f:
+    f.write(HEADER)
+    
+    # Write headline for df_test
+    f.write('<h2>HMBR</h2>')
+    f.write(df_test.to_html(classes='df_test'))
+    
+    # Write headline for df_zepto
+    f.write('<h2>ZEPTO</h2>')
+    f.write(df_zepto.to_html(classes='df_zepto'))
+    
+    # Write headline for df_gicorp
+    f.write('<h2>GI CORPORATION</h2>')
+    f.write(df_gicorp.to_html(classes='df_gicorp'))
+    
+    f.write(FOOTER)
+
+
+filename = "DailyOrderReport.html"
+f = open(filename)
+attachment = MIMEText(f.read(),'html')
+msg.attach(attachment)
+
+
+part1 = MIMEBase('application', "octet-stream")
+part1.set_payload(open("dailyOrderReport.xls", "rb").read())
+encoders.encode_base64(part1)
+part1.add_header('Content-Disposition', 'attachment; filename="dailyOrderReport.xls"')
+msg.attach(part1)
+
+username = 'pythonhmbr12@gmail.com'
+password = 'vksikttussvnbqef'
+
+s = smtplib.SMTP('smtp.gmail.com:587')
+s.starttls()
+s.login(username, password)
+s.sendmail(me,you,msg.as_string())
+s.quit()
+
+
+
+totaltime=time.time()
+
+print("--- %s seconds elapsed time for whole programme   ---" % (totaltime-main_time ))
