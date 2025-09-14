@@ -1,29 +1,3 @@
-"""
-📊 HM_16_Item_Wise_Profit.py – 30-Day Item-Wise Profit & Loss Report
-
-🚀 PURPOSE:
-    - Calculate item-wise gross & net profit for 6 businesses
-    - Uses COGS (inventory), returns (SR--), and GL expenses
-    - Export to one Excel (multi-sheet) + HTML email summary
-
-🏢 BUSINESSES:
-    - GI (ZID_GI)
-    - HMBR (Trading)
-    - Zepto Chemicals
-    - HMBR Grocery Shop
-    - HMBR Online Shop (Paint Roller)
-    - Gulshan Packaging
-
-📁 OUTPUT:
-    - HM_16_Item_Wise_Profit.xlsx (one sheet per business)
-    - Email with vertical HTML summary (SL No.)
-
-📬 EMAIL:
-    - Recipients: get_email_recipients("HM_16_Item_Wise_Profit")
-    - Fallback: ithmbrbd@gmail.com, asaddat87@gmail.com
-
-📅 PERIOD: Last 31 days (auto-calculated)
-"""
 import os
 import sys
 import pandas as pd
@@ -366,36 +340,13 @@ for brand, vals in main_data_dict.items():
 
 df = pd.DataFrame(data_rows)
 
-body_text = f"""
-Dear Sir,
-
-Please find the 30-day item-wise profit & loss report for 6 businesses.
-
-Period: {start_date} to {end_date}
 
 
-Full details in attachment. \n
-"""
-
-# ─────────────────────────────────────────────────────────────────────
-# 📬 10. Send Email
-# ─────────────────────────────────────────────────────────────────────
-try:
-    recipients = get_email_recipients(os.path.splitext(os.path.basename(__file__))[0])
-    print(f"📬 Recipients: {recipients}")
-except Exception as e:
-    print(f"⚠️ Fallback: {e}")
-    recipients = ["ithmbrbd@gmail.com"]
-
-subject = f"HM_16 Item-Wise Profit Report – {start_date} to {end_date}"
 # Send email with HTML table
 send_mail(
     recipient=["ithmbrbd@gmail.com"],
-    subject=f"HM_16 Daily Item-Wise Profit Summary {start_date} to {end_date}",
+    subject=f"Daily Item-Wise Profit Summary {start_date} to {end_date}",
     bodyText="Please find the item-wise profit summary below:",
     attachment=['item_wise_profit.xlsx'],
     html_body=[(df, f"Item-Wise Profit Summary Report {start_date} to {end_date}")]
 )
-
-engine.dispose()
-print("✅ HM_16 completed successfully.")

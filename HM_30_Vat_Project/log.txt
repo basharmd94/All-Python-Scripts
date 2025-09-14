@@ -4356,3 +4356,405 @@ Last Read month_df length : 43
 -------------------------------END---------------------------------
 
 
+-------------------------------2025-09-10---------------------------------
+date : 2025-09-10 
+
+First Read month_df sum : 6860253.1 
+
+First Read month_df_t sum : 6860253.1 
+
+First Read item_df sum : 2425350.9 
+
+s_amount total calculation : 6860253.1 
+
+chl_value_list read : [19155, 43633, 56518, 50346, 34904, 27656, 48686, 13151, 18711, 18547, 30499, 50039, 13637, 67662, 16230, 51720, 5454, 30956, 43007, 67304, 54793, 41229, 41199, 32072, 55175, 11167, 30343, 40921, 42707, 41826, 35253, 54400, 62028, 66857, 38166, 21223, 21702, 46210, 34606, 43102, 67951, 28187, 62483, 61334, 40499, 50353, 22318, 69204, 45763, 38382, 6243, 14995, 28073, 69821, 24009, 50439, 44780, 62595, 59195, 9938, 24331, 6125, 13770, 47652, 32977, 41488, 9195, 25998, 29144, 51513, 45450, 17715, 62888, 32837, 61482, 37387, 55400, 17017, 25619, 48684, 57002, 47493, 20497, 58603, 28515, 18998, 34108, 31971, 31745, 28969, 46433, 31284, 20926, 29984, 21799, 53230, 63696, 59707, 17735, 55440, 51566, 14182, 19352, 17154, 30219, 46950, 68256, 31762, 37527, 59914, 22742, 56592, 66668, 67561, 50678, 23422, 35546, 50981, 47652, 68133, 5602, 66945, 16540, 34260, 36140, 13077, 25376, 14502, 12684, 56061, 28919, 65342, 57884, 17033, 18334, 38544, 19780, 6801, 36597, 19270, 26583, 65159, 26315, 59598, 61261, 59241, 68680, 61480, 38552, 32396, 66543, 11639, 40832, 58203, 15260, 56409, 67027, 40815, 7531, 48273, 12634, 8640, 60090, 28002, 36218, 24446, 64827, 9046, 23603, 45946, 21710, 63511, 59891, 18857, 59065, 26776, 30751, 30275, 7761, 33073] 
+
+chl_value_list length : 180 
+
+chl_count_list read : [14, 10, 6, 11, 6, 10, 12, 14, 7, 9, 11, 4, 7, 6, 8, 8, 6, 14, 9, 8] 
+
+chl_count_list length : 20 
+
+chl_sum read : 242 
+
+no_challan used on this day : 14 
+
+chl_count_list after use : [10, 6, 11, 6, 10, 12, 14, 7, 9, 11, 4, 7, 6, 8, 8, 6, 14, 9, 8] 
+
+chl_count_list length after use : 19 
+
+chl_value_list_n creation with no_challan : [19155, 43633, 56518, 50346, 34904, 27656, 48686, 13151, 18711, 18547, 30499, 50039, 13637, 67662] 
+
+chl_value_list_n length : [19155, 43633, 56518, 50346, 34904, 27656, 48686, 13151, 18711, 18547, 30499, 50039, 13637, 67662] 
+
+length of sales df of samples : 14 
+
+length of chl_dict of sales people samples : 14 
+
+chl_value_list length after use : 166 
+
+chl_value_list creation with no_challan after use : [16230, 51720, 5454, 30956, 43007, 67304, 54793, 41229, 41199, 32072, 55175, 11167, 30343, 40921, 42707, 41826, 35253, 54400, 62028, 66857, 38166, 21223, 21702, 46210, 34606, 43102, 67951, 28187, 62483, 61334, 40499, 50353, 22318, 69204, 45763, 38382, 6243, 14995, 28073, 69821, 24009, 50439, 44780, 62595, 59195, 9938, 24331, 6125, 13770, 47652, 32977, 41488, 9195, 25998, 29144, 51513, 45450, 17715, 62888, 32837, 61482, 37387, 55400, 17017, 25619, 48684, 57002, 47493, 20497, 58603, 28515, 18998, 34108, 31971, 31745, 28969, 46433, 31284, 20926, 29984, 21799, 53230, 63696, 59707, 17735, 55440, 51566, 14182, 19352, 17154, 30219, 46950, 68256, 31762, 37527, 59914, 22742, 56592, 66668, 67561, 50678, 23422, 35546, 50981, 47652, 68133, 5602, 66945, 16540, 34260, 36140, 13077, 25376, 14502, 12684, 56061, 28919, 65342, 57884, 17033, 18334, 38544, 19780, 6801, 36597, 19270, 26583, 65159, 26315, 59598, 61261, 59241, 68680, 61480, 38552, 32396, 66543, 11639, 40832, 58203, 15260, 56409, 67027, 40815, 7531, 48273, 12634, 8640, 60090, 28002, 36218, 24446, 64827, 9046, 23603, 45946, 21710, 63511, 59891, 18857, 59065, 26776, 30751, 30275, 7761, 33073] 
+
+chl_value for every iter_Alauddin Hardware : 13151 
+
+s_amount after sample use_Alauddin Hardware : 6847107.4 
+
+item_df_t Taxable value sum each iter_Alauddin Hardware : 13145.7 
+
+each chl_df total value sum_Alauddin Hardware : 13145.7 
+
+gth of each chl_df : 4 
+
+chl_value for every iter_Bismillah Paint : 34904 
+
+s_amount after sample use_Bismillah Paint : 6812251.8 
+
+item_df_t Taxable value sum each iter_Bismillah Paint : 34855.6 
+
+each chl_df total value sum_Bismillah Paint : 34855.6 
+
+chl_value for every iter_Janata Electric & Hardware : 67662 
+
+s_amount after sample use_Janata Electric & Hardware : 6744661.0 
+
+item_df_t Taxable value sum each iter_Janata Electric & Hardware : 67590.8 
+
+each chl_df total value sum_Janata Electric & Hardware : 67590.8 
+
+chl_value for every iter_Khaja Hardware : 18547 
+
+s_amount after sample use_Khaja Hardware : 6726208.5 
+
+item_df_t Taxable value sum each iter_Khaja Hardware : 18452.5 
+
+each chl_df total value sum_Khaja Hardware : 18452.5 
+
+chl_value for every iter_Liton Hard : 50039 
+
+s_amount after sample use_Liton Hard : 6676104.5 
+
+item_df_t Taxable value sum each iter_Liton Hard : 50104.0 
+
+each chl_df total value sum_Liton Hard : 50104.0 
+
+chl_value for every iter_M/s Khan Hardware : 43633 
+
+s_amount after sample use_M/s Khan Hardware : 6632429.9 
+
+item_df_t Taxable value sum each iter_M/s Khan Hardware : 43674.6 
+
+each chl_df total value sum_M/s Khan Hardware : 43674.6 
+
+chl_value for every iter_Maa Hardware : 30499 
+
+s_amount after sample use_Maa Hardware : 6602100.4 
+
+item_df_t Taxable value sum each iter_Maa Hardware : 30329.5 
+
+each chl_df total value sum_Maa Hardware : 30329.5 
+
+chl_value for every iter_Mahadi Electric : 56518 
+
+s_amount after sample use_Mahadi Electric : 6545655.4 
+
+item_df_t Taxable value sum each iter_Mahadi Electric : 56445.0 
+
+each chl_df total value sum_Mahadi Electric : 56445.0 
+
+chl_value for every iter_Mollah Hardware : 19155 
+
+s_amount after sample use_Mollah Hardware : 6526762.4 
+
+item_df_t Taxable value sum each iter_Mollah Hardware : 18893.0 
+
+each chl_df total value sum_Mollah Hardware : 18893.0 
+
+chl_value for every iter_New Mirza Electric : 48686 
+
+s_amount after sample use_New Mirza Electric : 6477978.4 
+
+item_df_t Taxable value sum each iter_New Mirza Electric : 48784.0 
+
+each chl_df total value sum_New Mirza Electric : 48784.0 
+
+chl_value for every iter_Noor Hardware & sanitary : 50346 
+
+s_amount after sample use_Noor Hardware & sanitary : 6427577.9 
+
+item_df_t Taxable value sum each iter_Noor Hardware & sanitary : 50400.5 
+
+each chl_df total value sum_Noor Hardware & sanitary : 50400.5 
+
+chl_value for every iter_Patoyari Hardware : 18711 
+
+s_amount after sample use_Patoyari Hardware : 6408871.9 
+
+item_df_t Taxable value sum each iter_Patoyari Hardware : 18706.0 
+
+each chl_df total value sum_Patoyari Hardware : 18706.0 
+
+chl_value for every iter_Poddar Hardware Store : 27656 
+
+s_amount after sample use_Poddar Hardware Store : 6380202.9 
+
+item_df_t Taxable value sum each iter_Poddar Hardware Store : 28669.0 
+
+each chl_df total value sum_Poddar Hardware Store : 28669.0 
+
+chl_value for every iter_Srity : 13637 
+
+s_amount after sample use_Srity : 6366556.9 
+
+item_df_t Taxable value sum each iter_Srity : 13646.0 
+
+each chl_df total value sum_Srity : 13646.0 
+
+length of item df_list : 14 
+
+Last Read item_df sum : 2919047.1 
+
+Last Read item_df length : 519 
+
+Last Read month_df sum : 6366556.9 
+
+Last Read month_df length : 43 
+
+-------------------------------END---------------------------------
+
+
+-------------------------------2025-09-11---------------------------------
+date : 2025-09-11 
+
+First Read month_df sum : 6366556.9 
+
+First Read month_df_t sum : 6366556.9 
+
+First Read item_df sum : 2919047.1 
+
+s_amount total calculation : 6366556.9 
+
+chl_value_list read : [16230, 51720, 5454, 30956, 43007, 67304, 54793, 41229, 41199, 32072, 55175, 11167, 30343, 40921, 42707, 41826, 35253, 54400, 62028, 66857, 38166, 21223, 21702, 46210, 34606, 43102, 67951, 28187, 62483, 61334, 40499, 50353, 22318, 69204, 45763, 38382, 6243, 14995, 28073, 69821, 24009, 50439, 44780, 62595, 59195, 9938, 24331, 6125, 13770, 47652, 32977, 41488, 9195, 25998, 29144, 51513, 45450, 17715, 62888, 32837, 61482, 37387, 55400, 17017, 25619, 48684, 57002, 47493, 20497, 58603, 28515, 18998, 34108, 31971, 31745, 28969, 46433, 31284, 20926, 29984, 21799, 53230, 63696, 59707, 17735, 55440, 51566, 14182, 19352, 17154, 30219, 46950, 68256, 31762, 37527, 59914, 22742, 56592, 66668, 67561, 50678, 23422, 35546, 50981, 47652, 68133, 5602, 66945, 16540, 34260, 36140, 13077, 25376, 14502, 12684, 56061, 28919, 65342, 57884, 17033, 18334, 38544, 19780, 6801, 36597, 19270, 26583, 65159, 26315, 59598, 61261, 59241, 68680, 61480, 38552, 32396, 66543, 11639, 40832, 58203, 15260, 56409, 67027, 40815, 7531, 48273, 12634, 8640, 60090, 28002, 36218, 24446, 64827, 9046, 23603, 45946, 21710, 63511, 59891, 18857, 59065, 26776, 30751, 30275, 7761, 33073] 
+
+chl_value_list length : 166 
+
+chl_count_list read : [10, 6, 11, 6, 10, 12, 14, 7, 9, 11, 4, 7, 6, 8, 8, 6, 14, 9, 8] 
+
+chl_count_list length : 19 
+
+chl_sum read : 242 
+
+no_challan used on this day : 10 
+
+chl_count_list after use : [6, 11, 6, 10, 12, 14, 7, 9, 11, 4, 7, 6, 8, 8, 6, 14, 9, 8] 
+
+chl_count_list length after use : 18 
+
+chl_value_list_n creation with no_challan : [16230, 51720, 5454, 30956, 43007, 67304, 54793, 41229, 41199, 32072] 
+
+chl_value_list_n length : [16230, 51720, 5454, 30956, 43007, 67304, 54793, 41229, 41199, 32072] 
+
+length of sales df of samples : 10 
+
+length of chl_dict of sales people samples : 10 
+
+chl_value_list length after use : 156 
+
+chl_value_list creation with no_challan after use : [55175, 11167, 30343, 40921, 42707, 41826, 35253, 54400, 62028, 66857, 38166, 21223, 21702, 46210, 34606, 43102, 67951, 28187, 62483, 61334, 40499, 50353, 22318, 69204, 45763, 38382, 6243, 14995, 28073, 69821, 24009, 50439, 44780, 62595, 59195, 9938, 24331, 6125, 13770, 47652, 32977, 41488, 9195, 25998, 29144, 51513, 45450, 17715, 62888, 32837, 61482, 37387, 55400, 17017, 25619, 48684, 57002, 47493, 20497, 58603, 28515, 18998, 34108, 31971, 31745, 28969, 46433, 31284, 20926, 29984, 21799, 53230, 63696, 59707, 17735, 55440, 51566, 14182, 19352, 17154, 30219, 46950, 68256, 31762, 37527, 59914, 22742, 56592, 66668, 67561, 50678, 23422, 35546, 50981, 47652, 68133, 5602, 66945, 16540, 34260, 36140, 13077, 25376, 14502, 12684, 56061, 28919, 65342, 57884, 17033, 18334, 38544, 19780, 6801, 36597, 19270, 26583, 65159, 26315, 59598, 61261, 59241, 68680, 61480, 38552, 32396, 66543, 11639, 40832, 58203, 15260, 56409, 67027, 40815, 7531, 48273, 12634, 8640, 60090, 28002, 36218, 24446, 64827, 9046, 23603, 45946, 21710, 63511, 59891, 18857, 59065, 26776, 30751, 30275, 7761, 33073] 
+
+chl_value for every iter_Abd: Rahman Sanitary : 16230 
+
+s_amount after sample use_Abd: Rahman Sanitary : 6350171.9 
+
+item_df_t Taxable value sum each iter_Abd: Rahman Sanitary : 16385.0 
+
+each chl_df total value sum_Abd: Rahman Sanitary : 16385.0 
+
+gth of each chl_df : 7 
+
+chl_value for every iter_Badrul Hardware Store : 30956 
+
+s_amount after sample use_Badrul Hardware Store : 6319380.1 
+
+item_df_t Taxable value sum each iter_Badrul Hardware Store : 30791.8 
+
+each chl_df total value sum_Badrul Hardware Store : 30791.8 
+
+chl_value for every iter_Bhai Bhai Hardware & Electric : 43007 
+
+s_amount after sample use_Bhai Bhai Hardware & Electric : 6276206.0 
+
+item_df_t Taxable value sum each iter_Bhai Bhai Hardware & Electric : 43174.1 
+
+each chl_df total value sum_Bhai Bhai Hardware & Electric : 43174.1 
+
+chl_value for every iter_Janata Hardware & Paint Store : 32072 
+
+s_amount after sample use_Janata Hardware & Paint Store : 6244160.0 
+
+item_df_t Taxable value sum each iter_Janata Hardware & Paint Store : 32046.0 
+
+each chl_df total value sum_Janata Hardware & Paint Store : 32046.0 
+
+chl_value for every iter_Kamal Light House : 54793 
+
+s_amount after sample use_Kamal Light House : 6189053.0 
+
+item_df_t Taxable value sum each iter_Kamal Light House : 55107.0 
+
+each chl_df total value sum_Kamal Light House : 55107.0 
+
+chl_value for every iter_M.Nur Enterprise : 41229 
+
+s_amount after sample use_M.Nur Enterprise : 6147756.0 
+
+item_df_t Taxable value sum each iter_M.Nur Enterprise : 41297.0 
+
+each chl_df total value sum_M.Nur Enterprise : 41297.0 
+
+chl_value for every iter_Mannan Hardware : 51720 
+
+s_amount after sample use_Mannan Hardware : 6095307.7 
+
+item_df_t Taxable value sum each iter_Mannan Hardware : 51997.3 
+
+each chl_df total value sum_Mannan Hardware : 51997.3 
+
+chl_value for every iter_Mehedi Agency : 5454 
+
+s_amount after sample use_Mehedi Agency : 6090210.7 
+
+item_df_t Taxable value sum each iter_Mehedi Agency : 5097.0 
+
+each chl_df total value sum_Mehedi Agency : 5097.0 
+
+chl_value for every iter_Nobi Traders : 41199 
+
+s_amount after sample use_Nobi Traders : 6049176.0 
+
+item_df_t Taxable value sum each iter_Nobi Traders : 41034.7 
+
+each chl_df total value sum_Nobi Traders : 41034.7 
+
+chl_value for every iter_Saiful Electric & Hardware : 67304 
+
+s_amount after sample use_Saiful Electric & Hardware : 5981588.0 
+
+item_df_t Taxable value sum each iter_Saiful Electric & Hardware : 67588.0 
+
+each chl_df total value sum_Saiful Electric & Hardware : 67588.0 
+
+length of item df_list : 10 
+
+Last Read item_df sum : 3303565.0 
+
+Last Read item_df length : 609 
+
+Last Read month_df sum : 5981588.0 
+
+Last Read month_df length : 43 
+
+-------------------------------END---------------------------------
+
+
+-------------------------------2025-09-13---------------------------------
+date : 2025-09-13 
+
+First Read month_df sum : 5981588 
+
+First Read month_df_t sum : 5981588 
+
+First Read item_df sum : 3303565.0 
+
+s_amount total calculation : 5981588.0 
+
+chl_value_list read : [55175, 11167, 30343, 40921, 42707, 41826, 35253, 54400, 62028, 66857, 38166, 21223, 21702, 46210, 34606, 43102, 67951, 28187, 62483, 61334, 40499, 50353, 22318, 69204, 45763, 38382, 6243, 14995, 28073, 69821, 24009, 50439, 44780, 62595, 59195, 9938, 24331, 6125, 13770, 47652, 32977, 41488, 9195, 25998, 29144, 51513, 45450, 17715, 62888, 32837, 61482, 37387, 55400, 17017, 25619, 48684, 57002, 47493, 20497, 58603, 28515, 18998, 34108, 31971, 31745, 28969, 46433, 31284, 20926, 29984, 21799, 53230, 63696, 59707, 17735, 55440, 51566, 14182, 19352, 17154, 30219, 46950, 68256, 31762, 37527, 59914, 22742, 56592, 66668, 67561, 50678, 23422, 35546, 50981, 47652, 68133, 5602, 66945, 16540, 34260, 36140, 13077, 25376, 14502, 12684, 56061, 28919, 65342, 57884, 17033, 18334, 38544, 19780, 6801, 36597, 19270, 26583, 65159, 26315, 59598, 61261, 59241, 68680, 61480, 38552, 32396, 66543, 11639, 40832, 58203, 15260, 56409, 67027, 40815, 7531, 48273, 12634, 8640, 60090, 28002, 36218, 24446, 64827, 9046, 23603, 45946, 21710, 63511, 59891, 18857, 59065, 26776, 30751, 30275, 7761, 33073] 
+
+chl_value_list length : 156 
+
+chl_count_list read : [6, 11, 6, 10, 12, 14, 7, 9, 11, 4, 7, 6, 8, 8, 6, 14, 9, 8] 
+
+chl_count_list length : 18 
+
+chl_sum read : 242 
+
+no_challan used on this day : 6 
+
+chl_count_list after use : [11, 6, 10, 12, 14, 7, 9, 11, 4, 7, 6, 8, 8, 6, 14, 9, 8] 
+
+chl_count_list length after use : 17 
+
+chl_value_list_n creation with no_challan : [55175, 11167, 30343, 40921, 42707, 41826] 
+
+chl_value_list_n length : [55175, 11167, 30343, 40921, 42707, 41826] 
+
+length of sales df of samples : 6 
+
+length of chl_dict of sales people samples : 6 
+
+chl_value_list length after use : 150 
+
+chl_value_list creation with no_challan after use : [35253, 54400, 62028, 66857, 38166, 21223, 21702, 46210, 34606, 43102, 67951, 28187, 62483, 61334, 40499, 50353, 22318, 69204, 45763, 38382, 6243, 14995, 28073, 69821, 24009, 50439, 44780, 62595, 59195, 9938, 24331, 6125, 13770, 47652, 32977, 41488, 9195, 25998, 29144, 51513, 45450, 17715, 62888, 32837, 61482, 37387, 55400, 17017, 25619, 48684, 57002, 47493, 20497, 58603, 28515, 18998, 34108, 31971, 31745, 28969, 46433, 31284, 20926, 29984, 21799, 53230, 63696, 59707, 17735, 55440, 51566, 14182, 19352, 17154, 30219, 46950, 68256, 31762, 37527, 59914, 22742, 56592, 66668, 67561, 50678, 23422, 35546, 50981, 47652, 68133, 5602, 66945, 16540, 34260, 36140, 13077, 25376, 14502, 12684, 56061, 28919, 65342, 57884, 17033, 18334, 38544, 19780, 6801, 36597, 19270, 26583, 65159, 26315, 59598, 61261, 59241, 68680, 61480, 38552, 32396, 66543, 11639, 40832, 58203, 15260, 56409, 67027, 40815, 7531, 48273, 12634, 8640, 60090, 28002, 36218, 24446, 64827, 9046, 23603, 45946, 21710, 63511, 59891, 18857, 59065, 26776, 30751, 30275, 7761, 33073] 
+
+chl_value for every iter_Binimoy Hardware & Paints : 40921 
+
+s_amount after sample use_Binimoy Hardware & Paints : 5940396.0 
+
+item_df_t Taxable value sum each iter_Binimoy Hardware & Paints : 41192.0 
+
+each chl_df total value sum_Binimoy Hardware & Paints : 41192.0 
+
+gth of each chl_df : 4 
+
+chl_value for every iter_City Hadrware : 42707 
+
+s_amount after sample use_City Hadrware : 5897715.1 
+
+item_df_t Taxable value sum each iter_City Hadrware : 42680.9 
+
+each chl_df total value sum_City Hadrware : 42680.9 
+
+chl_value for every iter_M/S S.R Hardware : 55175 
+
+s_amount after sample use_M/S S.R Hardware : 5842384.6 
+
+item_df_t Taxable value sum each iter_M/S S.R Hardware : 55330.5 
+
+each chl_df total value sum_M/S S.R Hardware : 55330.5 
+
+chl_value for every iter_M/S Sondha Hardware : 30343 
+
+s_amount after sample use_M/S Sondha Hardware : 5812014.6 
+
+item_df_t Taxable value sum each iter_M/S Sondha Hardware : 30370.0 
+
+each chl_df total value sum_M/S Sondha Hardware : 30370.0 
+
+chl_value for every iter_Mir Hardware : 41826 
+
+s_amount after sample use_Mir Hardware : 5770219.1 
+
+item_df_t Taxable value sum each iter_Mir Hardware : 41795.5 
+
+each chl_df total value sum_Mir Hardware : 41795.5 
+
+chl_value for every iter_Nur Hardware : 11167 
+
+s_amount after sample use_Nur Hardware : 5759003.1 
+
+item_df_t Taxable value sum each iter_Nur Hardware : 11216.0 
+
+each chl_df total value sum_Nur Hardware : 11216.0 
+
+length of item df_list : 6 
+
+Last Read item_df sum : 3526149.9 
+
+Last Read item_df length : 649 
+
+Last Read month_df sum : 5759003.1 
+
+Last Read month_df length : 43 
+
+-------------------------------END---------------------------------
+
+
