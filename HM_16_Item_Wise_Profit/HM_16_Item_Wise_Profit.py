@@ -248,7 +248,6 @@ Full details in attachment. \n
 # ─────────────────────────────────────────────────────────────────────
 try:
     recipients = get_email_recipients(os.path.splitext(os.path.basename(__file__))[0])
-    recipients = ["ithmbrbd@gmail.com"]
     print(f"📬 Recipients: {recipients}")
 except Exception as e:
     print(f"⚠️ Fallback: {e}")
