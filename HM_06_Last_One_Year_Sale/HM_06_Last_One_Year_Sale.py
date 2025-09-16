@@ -134,7 +134,7 @@ df_sales['Date'] = df_sales['Date'].astype(str)
 
 
 # === 8. Fetch Return Data ===
-def get_returns(zid, start_date):
+def get_returns(zid, start_date, end_date):
     """Fetch return data from start of year."""
     query = """
         SELECT
@@ -153,17 +153,19 @@ def get_returns(zid, start_date):
           AND caitem.zid = %(zid)s
           AND cacus.zid = %(zid)s
           AND opcrn.xdate >= %(start_date)s
+          AND opcrn.xdate <= %(end_date)s
         GROUP BY opcrn.xcrnnum, opcrn.xdate, opcrn.xcus, cacus.xshort, cacus.xcity,
                  opcrn.xemp, prmst.xname, opcdt.xitem, caitem.xdesc, caitem.xabc
     """
-    return pd.read_sql(query, engine, params={'zid': zid, 'start_date': start_date})
+    return pd.read_sql(query, engine, params={'zid': zid, 'start_date': start_date, 'end_date': end_date})
 
 
 print("📊 Fetching return data...")
-df_returns = get_returns(ZID, CURRENT_YEAR_START)
+df_returns = get_returns(ZID, CURRENT_YEAR_START, TODAY)
 
 # Convert date and extract year/month
-df_returns['xdate'] = pd.to_datetime(df_returns['xdate'])
+df_returns['xdate'] = pd.to_datetime(df_returns['xdate'], errors='coerce')
+df_returns = df_returns.dropna(subset=['xdate'])
 df_returns['Year'] = df_returns['xdate'].dt.year
 df_returns['Month'] = df_returns['xdate'].dt.month_name()
 
@@ -290,6 +292,7 @@ except Exception as e:
 # === 13. Send Email ===
 try:
     recipients = get_email_recipients("HM_06_Last_One_Year_Sale")
+    # recipients = ["ithmbrbd@gmail.com"]
     print(f"📬 Recipients: {recipients}")
 except Exception as e:
     print(f"⚠️ Fallback: {e}")
