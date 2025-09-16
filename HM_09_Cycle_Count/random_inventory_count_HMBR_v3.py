@@ -237,13 +237,30 @@ def choose_zids_uniform(eligible_zids: list[int]) -> list[int]:
     return random.sample(eligible_zids, k=k)
 
 def weighted_sample(df: pd.DataFrame, n: int) -> pd.DataFrame:
+    """Sample up to n rows, preferring higher stockvalue but robust when few positives exist."""
     if df.empty:
         return df
-    weights = df["stockvalue"].clip(lower=0)
-    if weights.sum() == 0:
-        # If all weights are zero, sample uniformly
-        return df.sample(n=min(n, len(df)))
-    return df.sample(n=min(n, len(df)), weights=weights)
+    n = min(n, len(df))
+
+    w = pd.to_numeric(df["stockvalue"], errors="coerce").fillna(0).astype(float)
+    pos_mask = w > 0
+    pos_cnt = int(pos_mask.sum())
+
+    # Case 1: no positive weights → uniform sample
+    if pos_cnt == 0:
+        return df.sample(n=n, replace=False)
+
+    # Case 2: enough positive weights → weighted from positives only
+    if pos_cnt >= n:
+        return df.loc[pos_mask].sample(n=n, weights=w[pos_mask], replace=False)
+
+    # Case 3: some positives but not enough → take all positives (weighted),
+    # then fill the rest uniformly from zero/NaN-weight rows
+    part1 = df.loc[pos_mask].sample(n=pos_cnt, weights=w[pos_mask], replace=False)
+    remainder_pool = df.loc[~pos_mask]
+    part2 = remainder_pool.sample(n=n - pos_cnt, replace=False) if not remainder_pool.empty else pd.DataFrame()
+    return pd.concat([part1, part2], ignore_index=True)
+
 
 # ────────────────────────────────────────────────────────────────────
 # EMAIL
@@ -279,13 +296,27 @@ def build_html(counter_name: str, today: str,
              f"Please perform blind counts for the items listed below on {today}.</p>")
     return intro + "\n".join(sections)
 
+def _normalize_recipients(recips):
+    if not recips:
+        return []
+    first = recips[0]
+    # Already (name, email) tuples
+    if isinstance(first, tuple) and len(first) == 2:
+        return recips
+    # List of dicts like {"name": ..., "email": ...}
+    if isinstance(first, dict) and "email" in first:
+        return [(r.get("name", r["email"]), r["email"]) for r in recips]
+    # List of plain email strings
+    return [(r, r) for r in recips]
+
 def send_email(recipients: list[str], subject: str, html_body: str):
     """Send email using shared mail module."""
+    recips = _normalize_recipients(recipients)
     send_mail(
         subject=subject,
         bodyText="",  # Will be replaced by HTML
         attachment=[],
-        recipient=recipients,
+        recipient=recips,
         html_body=html_body
     )
 
@@ -319,14 +350,21 @@ def main():
         df_fg = filter_by_groups_and_wh(df, allow_groups, forbid_groups, allow_wh)
         counted_fg = load_fg_counted(zid, today)
         pool = remaining_pool_topN(df_fg, counted_fg)
+        # Debug: FG pool size and positive-weight rows
+        pos_mask = pd.to_numeric(pool["stockvalue"], errors="coerce").fillna(0) > 0
+        print(f"[FG] zid={zid} dept={DEPT.get(zid, zid)} | pool_rows={len(pool)} | "
+            f"positive_weights={pos_mask.sum()} | zero_or_nan={len(pool)-pos_mask.sum()} | "
+            f"requested={ITEMS_PER_ZID}")
         fg_pools[zid] = pool
         if not pool.empty:
             eligible_zids.append(zid)
 
     chosen_zids = choose_zids_uniform(eligible_zids)
+    print(f"[FG] eligible_zids={eligible_zids} -> chosen_zids={chosen_zids}")
 
     for zid in chosen_zids:
         picks = weighted_sample(fg_pools[zid], ITEMS_PER_ZID)
+        print(f"[FG] sampling {ITEMS_PER_ZID} from zid={zid} | pool_rows={len(fg_pools[zid])}")
         if picks.empty:
             continue
         append_fg_counted(zid, picks["itemcode"].tolist(), today)
@@ -355,6 +393,11 @@ def main():
             ineligible = {code for code, day in raw_log.items() if is_within_90_days(day, today)}
             pool = df_raw[~df_raw["itemcode"].isin(ineligible)]
             pool = pool.sort_values("stockvalue", ascending=False).head(POOL_N)
+            # Debug: RAW pool size and positive-weight rows
+            pos_mask = pd.to_numeric(pool["stockvalue"], errors="coerce").fillna(0) > 0
+            print(f"[RAW] zid={zid} dept={DEPT.get(zid, zid)} group='{group_name}' | "
+                f"pool_rows={len(pool)} | positive_weights={pos_mask.sum()} | "
+                f"zero_or_nan={len(pool)-pos_mask.sum()} | requested={RAW_ITEMS_PER_DAY}")
 
             picks = weighted_sample(pool, RAW_ITEMS_PER_DAY)
             if not picks.empty:
