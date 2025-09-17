@@ -1,24 +1,52 @@
-# %%
-from sqlalchemy import create_engine
+"""
+🌟 SUBJECT : 
+
+📅 Purpose:
+
+
+🧠 Logic Flow:
+
+
+🗃️ Tables Used:
+
+
+📬 Recipients:
+
+
+***** Note ****
+
+"""
+
+import os
+import sys
 import pandas as pd
 import numpy as np
-from datetime import date,datetime,timedelta
-import psycopg2
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
-import openpyxl
-import xlrd
-from dateutil.relativedelta import relativedelta
+from sqlalchemy import create_engine
+from dotenv import load_dotenv
+import warnings
+
+# === Load Environment & Config ===
+load_dotenv()
+ZID_HMBR = int(os.environ["ZID_GULSHAN_TRADING"])
+ZID_GI = int(os.environ["ZID_GI"])
+ZID_ZEPTO = int(os.environ["ZID_ZEPTO_CHEMICALS"])  # Zepto business
+
+PROJECT_ROOT = os.path.dirname(os.getcwd())
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from mail import send_mail, get_email_recipients
+from project_config import DATABASE_URL
+
+engine = create_engine(DATABASE_URL)
+warnings.filterwarnings('ignore', category=pd.errors.DtypeWarning)
+pd.set_option('display.float_format', '{:.2f}'.format)
 
 # %% [markdown]
 # 
 
 # %%
 def get_item(zid):
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
     df = pd.read_sql("""SELECT xitem,xdesc,xstdprice,xsrate 
                         FROM caitem 
                         WHERE zid = {} 
@@ -26,7 +54,6 @@ def get_item(zid):
     return df
 
 def get_sales(zid,year):
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
     df = pd.read_sql("""SELECT DISTINCT(imtrn.xitem), imtrn.xyear, SUM(imtrn.xqty) as qty, SUM(imtrn.xval) as cost, AVG(opddt.xrate) as rate , SUM(opddt.xdtwotax) as totamt
                         FROM imtrn
                         JOIN opddt
@@ -41,7 +68,6 @@ def get_sales(zid,year):
     return df
 
 def get_return(zid,year):
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
     df = pd.read_sql("""SELECT DISTINCT(imtrn.xitem), imtrn.xyear, SUM(imtrn.xqty) as rqty
                         FROM imtrn 
                         WHERE imtrn.zid = %s
@@ -51,7 +77,6 @@ def get_return(zid,year):
     return df
 
 def customer_count(zid,year):
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
     df = pd.read_sql("""SELECT imtrn.xyear,COUNT(DISTINCT(imtrn.xcus))
                         FROM imtrn
                         WHERE imtrn.zid = %s
@@ -61,7 +86,6 @@ def customer_count(zid,year):
     return df
 
 def day_count(zid,year):
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
     df = pd.read_sql("""SELECT imtrn.xyear,COUNT(DISTINCT(imtrn.xdate))
                         FROM imtrn
                         JOIN opddt
@@ -77,7 +101,7 @@ def day_count(zid,year):
 
 
 # %%
-zepto_zid = 100005
+zepto_zid = os.getenv('ZID_ZEPTO_CHEMICALS')
 year = 2018
 df_i = get_item(zepto_zid)
 df_s = get_sales(zepto_zid,year)
@@ -144,51 +168,52 @@ for sheet_name, dataframe in dataframes.items():
 # Save the Excel file
 writer.save()
 
-# %%
 
-def send_email_with_attachments(sender_email, sender_password, recipient_emails, subject, body, attachments):
-    # Establish a connection to the SMTP server
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
-    server.login(sender_email, sender_password)
 
-    # Create a multipart message container
-    message = MIMEMultipart()
-    message['From'] = sender_email
-    message['To'] = ', '.join(recipient_emails)
-    message['Subject'] = subject
 
-    # Add the email body as plain text
-    message.attach(MIMEText(body, 'plain'))
-
-    # Attach the files
-    for attachment in attachments:
-        part = MIMEBase('application', 'octet-stream')
-        part.set_payload(open(attachment, 'rb').read())
-        encoders.encode_base64(part)
-        part.add_header('Content-Disposition', f'attachment; filename="{attachment}"')
-        message.attach(part)
-
-    # Send the email
-    server.send_message(message)
-
-    # Clean up the connection
-    server.quit()
-
-# Sender and recipient details
-sender_email = 'pythonhmbr12@gmail.com'
-sender_password = 'vksikttussvnbqef'
 recipient_emails = ['ithmbrbd@gmail.com', ]
 
 # Email content
 subject = 'Zepto Sales before run profit and Loss'
 body = 'Please find attached the files you requested.'
 
-# Attachments
-attachments = ['zepto_sales_p.xlsx']
 
-# Send the email
-send_email_with_attachments(sender_email, sender_password, recipient_emails, subject, body, attachments)
+# === Email ===
+
+try:
+    # Extract report name from filename
+    report_name = os.path.splitext(os.path.basename(__file__))[0]
+    recipients = get_email_recipients(report_name)
+    print(f"📬 Recipients: {recipients}")
+except Exception as e:
+    print(f"⚠️ Failed to fetch recipients: {e}")
+    recipients = ["ithmbrbd@gmail.com"]  # Fallback
+
+
+
+body_text = """
+    <h4> Dear Sir, </h4>
+    <p>Please find the attached Excel/embeed HTML containing the subjective information.</p>
+
+    <p><b>Best Regards,</b></p>
+    <p>Automated Reporting System</p>
+"""
+
+send_mail(
+    subject="HM_29_1: Zepto Sales before run profit and Loss",
+    bodyText=body_text,
+    attachment= ['zepto_sales_p.xlsx'],
+    recipient=recipients,
+
+)
+print("📧 Email sent successfully")
+
+engine.dispose()
+# Attachments
+
+
+
+
 
 # %%
 
