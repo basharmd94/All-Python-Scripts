@@ -11,10 +11,7 @@ Automated financial reporting script that generates **Accounts Receivable (AR)**
   - `accountsPayable.xlsx` — per company supplier listing.
 - 📧 **Email Delivery**: Sends HTML summary tables + Excel attachments via internal mail utility.
 - 🔐 **Secure**: Uses parameterized SQL queries to prevent injection.
-- 🧩 **Dynamic**: Loads company names & IDs from `.env` (e.g., `PROJECT_100000=Karigor Ltd.`).
+- 🧩 **Dynamic**: Loads company names & IDs from `.env` (e.g., `PROJECT_100000=GI .`).
 - 🔄 **Reusable**: Built for PostgreSQL, easily adaptable to other GL structures.
 
-## 🏢 Supported Companies
 
-Configured dynamically via `.env` — no hardcoded names. Example:
-```env
