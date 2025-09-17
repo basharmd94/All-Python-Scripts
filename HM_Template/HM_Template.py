@@ -126,11 +126,13 @@ print("📧 Preparing email...")
 try:
     # Extract report name from filename
     report_name = os.path.splitext(os.path.basename(__file__))[0]
+    print(report_name)
     recipients = get_email_recipients(report_name)
     print(f"📬 Recipients: {recipients}")
 except Exception as e:
     print(f"⚠️ Failed to fetch recipients: {e}")
     recipients = ["ithmbrbd@gmail.com"]  # Fallback
+
 
 subject = f"HM_28 – Inventory Value by Warehouse ({YEAR})"
 
