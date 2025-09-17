@@ -117,7 +117,7 @@ print("📊 Generating monthly inventory value report...")
 with pd.ExcelWriter(OUTPUT_FILE, engine="xlsxwriter") as writer:
     for zid, business_name in ZID_MAP.items():
         print(f"📊 Processing: {business_name} (ZID={zid})")
-        monthly_data = []
+        monthly_data = None
 
         for month in range(1, CURRENT_MONTH + 1):
             last_day = last_day_of_month(YEAR, month)
@@ -128,7 +128,7 @@ with pd.ExcelWriter(OUTPUT_FILE, engine="xlsxwriter") as writer:
             df_month = get_inventory_value_by_warehouse(zid=zid, as_of_date=query_date)
             df_month.rename(columns={"value": month_label}, inplace=True)
 
-            if not monthly_data:  # First month
+            if monthly_data is None:  # First month
                 monthly_data = df_month
             else:
                 monthly_data = pd.merge(monthly_data, df_month, on="xwh", how="outer")
