@@ -11,8 +11,7 @@
 
 
 📬 Recipients:
-• Email: ithmbrbd@gmail.com,asaddat87@gmail.com,hmbronline@gmail.com
-• Subject: HM_31: Customer Order List With Phone Number (District + Retail)
+
 
 ***** Note ****
 
@@ -67,9 +66,18 @@ except Exception as e:
     recipients = ["ithmbrbd@gmail.com"]  # Fallback
 
 
+
+body_text = """
+    <h4> Dear Sir, </h4>
+    <p>Please find the attached Excel/embeed HTML containing the subjective information.</p>
+
+    <p><b>Best Regards,</b></p>
+    <p>Automated Reporting System</p>
+"""
+
 send_mail(
     subject="HM_31: Customer Order List With Phone Number (District + Retail)",
-    bodyText="Attached are the new customer orders for today.",
+    bodyText=body_text,
     attachment=['file.xlsx'],
     recipient=recipients,
     html_body = html_sections if len(html_sections) > 0 else [(df_new, f"Your Subject")]

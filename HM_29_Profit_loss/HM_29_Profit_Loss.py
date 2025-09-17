@@ -1,22 +1,32 @@
-# %%
-# in this new script whe remove plastic, scrubber, chemical section and rename GI_Corp to gi
-
-from sqlalchemy import create_engine
+import os
+import sys
 import pandas as pd
 import numpy as np
-from datetime import date,datetime,timedelta
-import psycopg2
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
-import openpyxl
-# pd.set_option('display.float_format', lambda x: '%.3f' % x)
-########4###########################
+from datetime import datetime, timedelta
+from sqlalchemy import create_engine
+from dotenv import load_dotenv
+import warnings
+
+# === Load Environment & Config ===
+load_dotenv()
+ZID_HMBR = int(os.environ["ZID_GULSHAN_TRADING"])
+ZID_GI = int(os.environ["ZID_GI"])
+ZID_ZEPTO = int(os.environ["ZID_ZEPTO_CHEMICALS"])  # Zepto business
+
+PROJECT_ROOT = os.path.dirname(os.getcwd())
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from mail import send_mail, get_email_recipients
+from project_config import DATABASE_URL
+
+engine = create_engine(DATABASE_URL)
+warnings.filterwarnings('ignore', category=pd.errors.DtypeWarning)
+pd.set_option('display.float_format', '{:.2f}'.format)
+
 
 def get_gl_details(zid,year,smonth,emonth):
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
+
     df = pd.read_sql("""select glmst.zid, glmst.xacc,glheader.xyear, glheader.xper,SUM(gldetail.xprime)
                         FROM glmst
                         JOIN
@@ -37,7 +47,6 @@ def get_gl_details(zid,year,smonth,emonth):
     return df
 
 def get_gl_details_project(zid,project,year,smonth,emonth):
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
     df = pd.read_sql("""select glmst.zid, glmst.xacc, glheader.xyear, glheader.xper,SUM(gldetail.xprime)
                         FROM glmst
                         JOIN
@@ -59,7 +68,6 @@ def get_gl_details_project(zid,project,year,smonth,emonth):
     return df
 
 def get_gl_details_bs(zid,year,emonth):
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
     df = pd.read_sql("""select glmst.zid, glmst.xacc, glheader.xyear, glheader.xper,SUM(gldetail.xprime)
                         FROM glmst
                         JOIN
@@ -78,7 +86,6 @@ def get_gl_details_bs(zid,year,emonth):
     return df
 
 def get_gl_details_bs_project(zid,project,year,emonth):
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
     df = pd.read_sql("""select glmst.zid, glmst.xacc, glmst.xacctype, glmst.xhrc1, glmst.xhrc2, glmst.xaccusage, glheader.xyear, glheader.xper,SUM(gldetail.xprime)
                         FROM glmst
                         JOIN
@@ -99,12 +106,10 @@ def get_gl_details_bs_project(zid,project,year,emonth):
     return df
 
 def get_gl_master(zid):
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
     df = pd.read_sql("""SELECT xacc, xdesc, xacctype, xhrc1, xhrc2, xhrc3, xhrc4 FROM glmst WHERE glmst.zid = %s"""%(zid),con=engine)
     return df
 
 def get_gl_details_ap_project(zid,project,year,xacc,emonth,sup_list):
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
     if isinstance(sup_list,tuple):
         df1 = pd.read_sql("""SELECT 'INTERNAL',SUM(gldetail.xprime)
                             FROM glmst
@@ -174,36 +179,84 @@ def get_gl_details_ap_project(zid,project,year,xacc,emonth,sup_list):
     df = pd.concat([df1,df2],axis=0)
     return df
 
-# %%
+
 
 ap_dict =  {100000:['GI Corporation','9030001',('SUP-000003','SUP-000004','SUP-000060','SUP-000061')],
             100001:['GULSHAN TRADING','09030001',('SUP-000001','SUP-000002','SUP-000003','SUP-000004','SUP-000010','SUP-000014','SUP-000020','SUP-000027','SUP-000049','SUP-000057')],
             100005:['Zepto Chemicals','09030001',('SUP-000006','SUP-000011','SUP-000012','SUP-000016')],
             100006:['HMBR Grocery Shop','09030001',('SUP-000006','SUP-000003')],
+            100007:['HMBR Online Shop.','09030001',('SUP-000001','SUP-000003','SUP-000002','SUP-000004','SUP-000005')],
             100009:['Gulshan Packaging','09030001','SUP-000002']}
 
     
 
 
-# %%
+
 ### define business Id and date time year list for comparison (separate if project)
-zid_list_hmbr = [100005,100006,100009]
+zid_list_hmbr = [100005,100006,100009,100007]
 # zid_list_fixit = [100000,100001,100002,100003]
 zid_trade = 100001
 zid_plastic = 100004
 zid_GI_Corp = 100000
+
 
 project_trade = 'GULSHAN TRADING'
 
 project_plastic = 'Gulshan Plastic'
 
 project_GI_Corp = 'GI Corporation'
-##### call SQL once and get the main data once into a dataframe (get the year and month as an integer)
-start_year = int(input('input year like 2022------  '))
-start_month = int(input('input from month eg: if january then 1------'))
-end_month = int(input('input end month eg: if january then 1------  '))
 
-# %%
+project_HMBR_Online = 'HMBR Online Shop.'
+##### call SQL once and get the main data once into a dataframe (get the year and month as an integer)
+def _prompt_int(prompt_text, min_val, max_val, default_val=None):
+    while True:
+        raw = input(f"{prompt_text} ")
+        if raw.strip() == "" and default_val is not None:
+            return int(default_val)
+        try:
+            val = int(raw)
+            if val < min_val or val > max_val:
+                print(f"Please enter a value between {min_val} and {max_val}.")
+                continue
+            return val
+        except ValueError:
+            print("Invalid number. Please try again.")
+
+current_year = datetime.now().year
+current_month = datetime.now().month
+prev_month = 12 if current_month == 1 else current_month - 1
+
+start_year = _prompt_int(
+    prompt_text=f"Enter fiscal year (e.g., 2024) [default: {current_year}]",
+    min_val=2000,
+    max_val=current_year + 1,
+    default_val=current_year
+)
+
+start_month = _prompt_int(
+    prompt_text="Enter start month (1-12) [default: 1]",
+    min_val=1,
+    max_val=12,
+    default_val=1
+)
+
+end_month = _prompt_int(
+    prompt_text=f"Enter end month (1-12) [default: {prev_month}]",
+    min_val=1,
+    max_val=12,
+    default_val=prev_month
+)
+
+while end_month < start_month:
+    print("End month cannot be earlier than start month. Please re-enter end month.")
+    end_month = _prompt_int(
+        prompt_text=f"Enter end month (>= {start_month})",
+        min_val=start_month,
+        max_val=12,
+        default_val=start_month
+    )
+
+
 ### make a 3 year list
 year_list = []
 new_year = 0
@@ -217,7 +270,7 @@ year_list.reverse()
     # in order for a proper debug we are going to do sum tests on each part of the project algorithm loop to find our why the merge is not working
     #that is exactly what is not working becuase the data behaves until then. 
 
-# %%
+
 
 main_data_dict_pl = {}
 for i in zid_list_hmbr:
@@ -235,7 +288,7 @@ for i in zid_list_hmbr:
             df_new = df_new.merge(df[['xacc','sum']],on=['xacc'],how='left').rename(columns={'sum':idx}).fillna(0)
     main_data_dict_pl[i] = df_new.sort_values(['xacctype'],ascending=True)
 
-# %%
+
 df_master = get_gl_master(zid_trade)
 df_master = df_master[(df_master['xacctype']!='Asset') & (df_master['xacctype']!='Liability')]
 for item,idx in enumerate(year_list):
@@ -247,7 +300,7 @@ for item,idx in enumerate(year_list):
         df_new = df_new.merge(df[['xacc','sum']],on=['xacc'],how='left').rename(columns={'sum':idx}).fillna(0)
 main_data_dict_pl[zid_trade] = df_new.sort_values(['xacctype'],ascending=True)
 
-# %%
+
 df_master = get_gl_master(zid_plastic)
 df_master = df_master[(df_master['xacctype']!='Asset') & (df_master['xacctype']!='Liability')]
 for item,idx in enumerate(year_list):
@@ -259,7 +312,7 @@ for item,idx in enumerate(year_list):
         df_new = df_new.merge(df[['xacc','sum']],on=['xacc'],how='left').rename(columns={'sum':idx}).fillna(0)
 main_data_dict_pl[zid_plastic] = df_new.sort_values(['xacctype'],ascending=True)
 
-# %%
+
 df_master = get_gl_master(zid_GI_Corp)
 df_master = df_master[(df_master['xacctype']!='Asset') & (df_master['xacctype']!='Liability')]
 for item,idx in enumerate(year_list):
@@ -270,10 +323,10 @@ for item,idx in enumerate(year_list):
         df_new = df_master.merge(df[['xacc','sum']],on=['xacc'],how='left').rename(columns={'sum':idx}).fillna(0)
     else:
         df_new = df_new.merge(df[['xacc','sum']],on=['xacc'],how='left').rename(columns={'sum':idx}).fillna(0)
-    print('kargor work is done')
+    print('GI work is done')
 main_data_dict_pl[zid_GI_Corp] = df_new.sort_values(['xacctype'],ascending=True)
 
-# %%
+
 
 main_data_dict_bs = {}
 for i in zid_list_hmbr:
@@ -288,10 +341,10 @@ for i in zid_list_hmbr:
             df_new = df_new.merge(df[['xacc','sum']],on=['xacc'],how='left').fillna(0).rename(columns={'sum':idx})
         main_data_dict_bs[i] = df_new.sort_values(['xacctype'],ascending=True)
 
-# %%
+
 main_data_dict_bs.keys()
 
-# %%
+
 # df_trade_bs = df_trade_bs.groupby(['xacc','xdesc'])['sum'].sum().reset_index().round(1).rename(columns={'sum':start_year})
 df_master = get_gl_master(zid_trade)
 df_master = df_master[(df_master['xacctype']!='Income') & (df_master['xacctype']!='Expenditure')]
@@ -306,7 +359,7 @@ for item,idx in enumerate(year_list):
 # df_new = df_new.merge(df_mst,on='xacc',how='left')
 main_data_dict_bs[zid_trade] = df_new.sort_values(['xacctype'],ascending=True)
 
-# %%
+
 df_master = get_gl_master(zid_plastic)
 df_master = df_master[(df_master['xacctype']!='Income') & (df_master['xacctype']!='Expenditure')]
 for item,idx in enumerate(year_list):
@@ -320,7 +373,7 @@ for item,idx in enumerate(year_list):
 # df_new = df_new.merge(df_mst,on='xacc',how='left')
 # main_data_dict_bs[zid_plastic] = df_new.sort_values(['xacctype'],ascending=True)
 
-# %%
+
 df_master = get_gl_master(zid_GI_Corp)
 df_master = df_master[(df_master['xacctype']!='Income') & (df_master['xacctype']!='Expenditure')]
 for item,idx in enumerate(year_list):
@@ -334,7 +387,7 @@ for item,idx in enumerate(year_list):
 # df_new = df_new.merge(df_mst,on='xacc',how='left')
 main_data_dict_bs[zid_GI_Corp] = df_new.sort_values(['xacctype'],ascending=True)
 
-# %%
+
 ap_final_dict = {}
 data_ap = {'AP_TYPE':['INTERNAL','EXTERNAL']}
 
@@ -351,7 +404,7 @@ for k,v in ap_dict.items():
         df_ap = df_ap.merge(df_1,on='AP_TYPE',how='left')
         ap_final_dict[k] = df_ap
 
-# %%
+
 
 level_1_dict = {}
 for key in main_data_dict_pl:
@@ -372,7 +425,7 @@ for key in main_data_dict_pl:
     level_3_dict[key].loc[len(level_3_dict[key].index),:]=level_3_dict[key].sum(axis=0,numeric_only = True)
     level_3_dict[key].at[len(level_3_dict[key].index)-1,'xhrc2'] = 'Profit/Loss'
 
-# %%
+
 income_statement_label = {'04-Cost of Goods Sold':'02-Cost of Revenue',
 '0401-DIRECT EXPENSES':'07-Other Operating Expenses, Total',
 '0401-PURCHASE':'07-Other Operating Expenses, Total',
@@ -396,7 +449,7 @@ income_statement_label = {'04-Cost of Goods Sold':'02-Cost of Revenue',
 '':'06-Unusual Expenses (Income)',
 'Profit/Loss':'10-Net Income'}
 
-# %%
+
 income_label = pd.DataFrame(income_statement_label.items(),columns = ['xhrc4','Income Statement'])
 
 level_4_dict = {}
@@ -421,7 +474,7 @@ for key in main_data_dict_pl:
     income_s_dict[key] = income_s_dict[key].sort_index().reset_index(drop=True)
     print('end',len(income_s_dict[key]))
 
-# %%
+
 balance_sheet_label = {
 '0101-CASH & CASH EQUIVALENT':'01-Cash',
 '0102-BANK BALANCE':'01-Cash',
@@ -456,13 +509,13 @@ balance_sheet_label = {
 '1202-Long Term Bank Loan':'11-Debt',
 '13-Owners Equity':'13-Total Shareholders Equity'}
 
-# %%
+
 balance_label = pd.DataFrame(balance_sheet_label.items(),columns = ['xhrc4','Balance Sheet'])
 
 level_4_dict_bs = {}
 balance_s_dict = {}
 
-# %%
+
 ap_final_dict.keys()
 
 main_data_dict_bs.keys()
@@ -475,7 +528,7 @@ if 100004 in main_data_dict_bs:
 # Verify the key is removed
 print(main_data_dict_bs.keys())
 
-# %%
+
 for key in main_data_dict_bs:
     level_4_dict_bs[key] = main_data_dict_bs[key].groupby(['xhrc4'])[[i for i in year_list]].sum().reset_index().round(1)
     level_4_dict_bs[key].loc[len(level_4_dict_bs[key].index),:]=level_4_dict_bs[key].sum(axis=0,numeric_only = True)
@@ -520,13 +573,13 @@ for key in main_data_dict_bs:
 
 
 
-# %%
+
 income_s_dict.keys()
 if 100004 in income_s_dict:
     del income_s_dict[100004]
 income_s_dict.keys()
 
-# %%
+
 
 
 #cash flow statement
@@ -589,7 +642,7 @@ for key in income_s_dict:
 
     cashflow_s_dict[key] = df2
 
-# %%
+
 
 statement_3_dict = {}
 for key in income_s_dict:
@@ -855,12 +908,12 @@ for key in income_s_dict:
     
     statement_3_dict[key] = df1
 
-# %%
+
 main_data_dict_pl
 
-# %%
 
-zid_dict = {100000:'GI_Corp',100001:'Trading',100005:'Zepto',100006:'Grocery',100009:'Packaging'}
+
+zid_dict = {100000:'GI_Corp',100001:'Trading',100005:'Zepto',100006:'Grocery',100009:'Packaging',100007:'HMBR_Online_Shop'}
 
 # take income of Trading, GI_Corp, Zepto & Grocery for the 3 years in 3 different dataframes
 
@@ -880,15 +933,15 @@ income_df.at[len(income_df.index)-1,'Name'] = 'Total'
 pl_data_COGS = main_data_dict_pl
 COGS_dict = {}
 
-# %%
+
 pl_data_COGS
 
-# %%
+
 if 100004 in pl_data_COGS:
     del pl_data_COGS[100004]
 pl_data_COGS.keys()
 
-# %%
+
 
 # Process COGS data
 for key in pl_data_COGS:
@@ -946,7 +999,6 @@ print(COGS_df)
 print("\nExpense DataFrame:")
 print(expense_df)
 
-# %%
 
 pl_data_profit = main_data_dict_pl
 profit_dict = {}
@@ -975,7 +1027,7 @@ EBITDA_df = EBITDA_df[new_cols]
 EBITDA_df.loc[len(EBITDA_df.index),:] = EBITDA_df.sum(axis=0,numeric_only=True)
 EBITDA_df.at[len(EBITDA_df.index)-1,'Name'] = 'Total'
 
-# %%
+
 
 pl_data_tax = level_3_dict
 tax_dict = {}
@@ -1004,7 +1056,7 @@ interest_df.loc[len(interest_df.index),:] = interest_df.sum(axis=0,numeric_only=
 interest_df.at[len(interest_df.index)-1,'Name'] = 'Total'
 
 
-# %%
+
 
 ##New code addition by director on 19112022 regarding ap ar and inv
 pl_data_apari = main_data_dict_bs
@@ -1018,24 +1070,26 @@ for key in pl_data_apari:
     apari_df['Name'] = apari_df['Business'].map(zid_dict)
 
 
-# %%
+
 
 ###Profit & loss
 hmbr_pl = main_data_dict_pl[100001]
 GI_Corp_pl = main_data_dict_pl[100000]
 zepto_pl = main_data_dict_pl[100005]
 grocery_pl = main_data_dict_pl[100006]
+online_pl = main_data_dict_pl[100007]
 packaging_pl = main_data_dict_pl[100009]
 
-# %%
+
 
 hmbr_bs = main_data_dict_bs[100001]
 GI_Corp_bs = main_data_dict_bs[100000]
 zepto_bs = main_data_dict_bs[100005]
 grocery_bs = main_data_dict_bs[100006]
+online_bs = main_data_dict_bs[100007]
 packaging_bs = main_data_dict_bs[100009]
 
-# %%
+
 
 ### all balance sheet together
 all_bs = pd.concat(main_data_dict_bs,axis=0)
@@ -1045,30 +1099,33 @@ hmbr_summery = level_1_dict[100001]
 GI_Corp_summery = level_1_dict[100000]
 zepto_summery = level_1_dict[100005]
 grocery_summery = level_1_dict[100006]
+online_summery = level_1_dict[100007]
 packaging_summery = level_1_dict[100009]
 
 
-# %%
+
 
 ##lvl 4
 hmbr_summery_lvl_4 = level_4_dict[100001]
 GI_Corp_summery_lvl_4 = level_4_dict[100000]
 zepto_summery_lvl_4 = level_4_dict[100005]
 grocery_summery_lvl_4 = level_4_dict[100006]
+online_summery_lvl_4 = level_4_dict[100007]
 packaging_summery_lvl_4 = level_4_dict[100009]
 
 all_lvl_4 = pd.concat(level_4_dict,axis = 0)
 
 
-# %%
+
 level_4_dict_bs.keys()
 
-# %%
+
 
 hmbr_summery_lvl_4_bs = level_4_dict_bs[100001]
 GI_Corp_summery_lvl_4_bs = level_4_dict_bs[100000]
 zepto_summery_lvl_4_bs = level_4_dict_bs[100005]
 grocery_summery_lvl_4_bs = level_4_dict_bs[100006]
+online_summery_lvl_4_bs = level_4_dict_bs[100007]
 packaging_summery_lvl_4_bs = level_4_dict_bs[100009]
 
 all_lvl_4_bs = pd.concat(level_4_dict_bs,axis = 0)
@@ -1077,6 +1134,7 @@ hmbr_summery_ap_final_dict = ap_final_dict[100001]
 GI_Corp_summery_ap_final_dict = ap_final_dict[100000]
 zepto_summery_ap_final_dict = ap_final_dict[100005]
 grocery_summery_ap_final_dict = ap_final_dict[100006]
+online_summery_ap_final_dict = ap_final_dict[100007]
 packaging_summery_ap_final_dict = ap_final_dict[100009]
 
 all_ap_final_dict = pd.concat(ap_final_dict,axis=0)
@@ -1085,15 +1143,17 @@ hmbr_summery_statements = statement_3_dict[100001]
 GI_Corp_summery_statements = statement_3_dict[100000]
 zepto_summery_statements = statement_3_dict[100005]
 grocery_summery_statements = statement_3_dict[100006]
+online_summery_statements = statement_3_dict[100007]
 packaging_summery_statements = statement_3_dict[100009]
 
-# %%
+
 
 with pd.ExcelWriter('level_4.xlsx') as writer:  
     hmbr_summery_lvl_4.to_excel(writer, sheet_name='100001')
     GI_Corp_summery_lvl_4.to_excel(writer, sheet_name='100000')
     zepto_summery_lvl_4.to_excel(writer, sheet_name='100005')
     grocery_summery_lvl_4.to_excel(writer, sheet_name='100006')
+    online_summery_lvl_4.to_excel(writer, sheet_name='100007')
     packaging_summery_lvl_4.to_excel(writer, sheet_name='100009')
 
 ###Excel File Generate
@@ -1109,6 +1169,7 @@ with pd.ExcelWriter(profit_excel) as writer:
     GI_Corp_pl.to_excel(writer, sheet_name='100000')
     zepto_pl.to_excel(writer, sheet_name='100005')
     grocery_pl.to_excel(writer, sheet_name='100006')
+    online_pl.to_excel(writer, sheet_name='100007')
     packaging_pl.to_excel(writer, sheet_name='100009')
 
 with pd.ExcelWriter(balance_excel) as writer:  
@@ -1116,6 +1177,7 @@ with pd.ExcelWriter(balance_excel) as writer:
     GI_Corp_bs.to_excel(writer, sheet_name='100000')
     zepto_bs.to_excel(writer, sheet_name='100005')
     grocery_bs.to_excel(writer, sheet_name='100006')
+    online_bs.to_excel(writer, sheet_name='100007')
     packaging_bs.to_excel(writer, sheet_name='100009')
     all_bs.to_excel(writer, sheet_name='all_bs')
 
@@ -1138,6 +1200,7 @@ with pd.ExcelWriter(lvl_4_details_excel) as writer:
     GI_Corp_summery_lvl_4.to_excel(writer, sheet_name='100000')
     zepto_summery_lvl_4.to_excel(writer, sheet_name='100005')
     grocery_summery_lvl_4.to_excel(writer, sheet_name='100006')
+    online_summery_lvl_4_bs.to_excel(writer, sheet_name='100007')
     packaging_summery_lvl_4.to_excel(writer, sheet_name='100009')
     all_lvl_4.to_excel(writer,sheet_name='all_lvl_4')
 #lvl4-bs
@@ -1146,6 +1209,7 @@ with pd.ExcelWriter(lvl_4_bs_details_excel) as writer:
     GI_Corp_summery_lvl_4_bs.to_excel(writer, sheet_name='100000')
     zepto_summery_lvl_4_bs.to_excel(writer, sheet_name='100005')
     grocery_summery_lvl_4_bs.to_excel(writer, sheet_name='100006')
+    online_summery_lvl_4_bs.to_excel(writer, sheet_name='100007')
     packaging_summery_lvl_4_bs.to_excel(writer, sheet_name='100009')
     all_lvl_4_bs.to_excel(writer,sheet_name='all_lvl_4_bs')
 
@@ -1154,6 +1218,7 @@ with pd.ExcelWriter(ap_final_dict_excel) as writer:
     GI_Corp_summery_ap_final_dict.to_excel(writer,sheet_name='100000')
     zepto_summery_ap_final_dict.to_excel(writer,sheet_name='100005')
     grocery_summery_ap_final_dict.to_excel(writer,sheet_name='100006')
+    online_summery_ap_final_dict.to_excel(writer,sheet_name='100007')
     packaging_summery_ap_final_dict.to_excel(writer,sheet_name='100009')
     all_ap_final_dict.to_excel(writer,sheet_name='all_ap_final_dict')
 
@@ -1162,115 +1227,62 @@ with pd.ExcelWriter(statement_3_dict_excel) as writer:
     GI_Corp_summery_statements.to_excel(writer,sheet_name='100000')
     zepto_summery_statements.to_excel(writer,sheet_name='100005')
     grocery_summery_statements.to_excel(writer,sheet_name='100006')
+    online_summery_statements.to_excel(writer,sheet_name='100007')
     packaging_summery_statements.to_excel(writer,sheet_name='100009')
 
-# %%
-
-# ###Email    
-me = "pythonhmbr12@gmail.com"
-you = ["ithmbrbd@gmail.com", "asaddat87@gmail.com", "motiurhmbr@gmail.com", "hmbr12@gmail.com", ]
-#you = ["ithmbrbd@gmail.com","admhmbr@gmail.com"]
-
-msg = MIMEMultipart('alternative')
-msg['Subject'] = f"profit & loss HMBR .year: {start_year} month from {start_month} to {end_month}"
-msg['From'] = me
-msg['To'] = ", ".join(you)
-
-HEADER = '''
-<html>
-    <head>
-    </head>
-    <body>
-'''
-FOOTER = '''
-    </body>
-</html>
-'''
-# income_df COGS_df expense_df, profit_df asset_df liable_df
-with open('profitLoss.html','w') as f:
-    f.write(HEADER)
-    f.write('HMBR Details')
-    f.write(hmbr_summery.to_html(classes='df_summery'))
-    f.write('GI Details')
-    f.write(GI_Corp_summery.to_html(classes='df_summery1'))
-    f.write(zepto_summery.to_html(classes='df_summery5'))
-    f.write('Grocery Details')
-    f.write(grocery_summery.to_html(classes='df_summery6'))
-    f.write('Packaging Details')
-    f.write(packaging_summery.to_html(classes='df_summery9'))
-    f.write('Cost of good sold details')
-    f.write(COGS_df.to_html(classes='df_summery10'))
-    f.write('Income Details')
-    f.write(income_df.to_html(classes='df_summery11'))
-    f.write('Expense details')
-    f.write(expense_df.to_html(classes='df_summery12'))
-    f.write('Profit Details')
-    f.write(profit_df.to_html(classes='df_summery13'))
-    # f.write('Asset Details')
-    # f.write(asset_df.to_html(classes='df_summery14'))
-    # f.write('Liability Details')
-    # f.write(liable_df.to_html(classes='df_summery15'))
-    f.write(FOOTER)
-
-filename = "profitLoss.html"
-f = open(filename)
-attachment = MIMEText(f.read(),'html')
-msg.attach(attachment)
-
-part1 = MIMEBase('application', "octet-stream")
-part1.set_payload(open(profit_excel, "rb").read())
-encoders.encode_base64(part1)
-part1.add_header('Content-Disposition', 'attachment; filename="profit.xlsx"')
-msg.attach(part1)
-
-part2 = MIMEBase('application', "octet-stream")
-part2.set_payload(open(balance_excel, "rb").read())
-encoders.encode_base64(part2)
-part2.add_header('Content-Disposition', 'attachment; filename="balance.xlsx"')
-msg.attach(part2)
-
-part3 = MIMEBase('application', "octet-stream")
-part3.set_payload(open(details_excel, "rb").read())
-encoders.encode_base64(part3)
-part3.add_header('Content-Disposition', 'attachment; filename="profitLossDetail.xlsx"')
-msg.attach(part3)
-
-part4 = MIMEBase('application', "octet-stream")
-part4.set_payload(open(lvl_4_details_excel, "rb").read())
-encoders.encode_base64(part4)
-part4.add_header('Content-Disposition', 'attachment; filename="lvl_3.xlsx"')
-msg.attach(part4)
-
-part5 = MIMEBase('application', "octet-stream")
-part5.set_payload(open(lvl_4_bs_details_excel, "rb").read())
-encoders.encode_base64(part5)
-part5.add_header('Content-Disposition', 'attachment; filename="lvl_3bs_.xlsx"')
-msg.attach(part5)
-
-part6 = MIMEBase('application', "octet-stream")
-part6.set_payload(open(ap_final_dict_excel, "rb").read())
-encoders.encode_base64(part6)
-part6.add_header('Content-Disposition', 'attachment; filename="ap_final_dict_.xlsx"')
-msg.attach(part6)
-
-part7 = MIMEBase('application', "octet-stream")
-part7.set_payload(open(statement_3_dict_excel, "rb").read())
-encoders.encode_base64(part7)
-part7.add_header('Content-Disposition', 'attachment; filename="statement_3_dict_.xlsx"')
-msg.attach(part7)
-
-username = 'pythonhmbr12@gmail.com'
-password = 'vksikttussvnbqef'
 
 
-s = smtplib.SMTP('smtp.gmail.com:587')
-s.starttls()
-s.login(username, password)
-s.sendmail(me,you,msg.as_string())
-s.quit()
+# === Email (Template-consistent) ===
+try:
+    report_name = os.path.splitext(os.path.basename(__file__))[0]
+    recipients = get_email_recipients(report_name)
+    print(f"📬 Recipients: {recipients}")
+    # recipients = ["ithmbrbd@gmail.com"]  # sample
+except Exception as e:
+    print(f"⚠️ Failed to fetch recipients: {e}")
+    recipients = ["ithmbrbd@gmail.com"]
 
-
-# %%
+html_sections = [
+    (hmbr_summery, 'HMBR Details'),
+    (GI_Corp_summery, 'GI Details'),
+    (zepto_summery, 'Zepto Details'),
+    (grocery_summery, 'Grocery Details'),
+    (online_summery, 'Online Details'),
+    (packaging_summery, 'Packaging Details'),
+    (COGS_df, 'Cost of good sold details'),
+    (income_df, 'Income Details'),
+    (expense_df, 'Expense details'),
+    (profit_df, 'Profit Details')
+]
 
 
 
+body_text = """
+    <h4> Dear Sir, </h4>
+    <p>Please find the attached Excel/embeed HTML containing the subjective information.</p>
+
+    <p><b>Best Regards,</b></p>
+    <p>Automated Reporting System</p>
+"""
+
+
+send_mail(
+    subject=f"HM_29 Profit & Loss: Year {start_year} Months {start_month}–{end_month}",
+    bodyText="Attached are Profit & Loss, Balance Sheet, and detailed statements.",
+    attachment=[
+        profit_excel,
+        balance_excel,
+        details_excel,
+        lvl_4_details_excel,
+        lvl_4_bs_details_excel,
+        ap_final_dict_excel,
+        statement_3_dict_excel
+    ],
+    recipient=recipients,
+    html_body=html_sections
+)
+print("📧 Email sent successfully")
+
+# === Cleanup ===
+engine.dispose()
+print("✅ Process completed")
