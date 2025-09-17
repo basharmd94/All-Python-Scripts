@@ -42,10 +42,8 @@ engine = create_engine(DATABASE_URL)
 warnings.filterwarnings('ignore', category=pd.errors.DtypeWarning)
 pd.set_option('display.float_format', '{:.2f}'.format)
 
-# %% [markdown]
-# 
 
-# %%
+
 def get_item(zid):
     df = pd.read_sql("""SELECT xitem,xdesc,xstdprice,xsrate 
                         FROM caitem 
@@ -100,7 +98,7 @@ def day_count(zid,year):
     return df
 
 
-# %%
+
 zepto_zid = os.getenv('ZID_ZEPTO_CHEMICALS')
 year = 2018
 df_i = get_item(zepto_zid)
@@ -109,13 +107,8 @@ df_r = get_return(zepto_zid,year)
 df_c = customer_count(zepto_zid,year)
 df_y = day_count(zepto_zid,year)
 
-# %%
+
 df_master = df_i.merge(df_s[['xitem','xyear','qty','cost','rate','totamt']],on=['xitem'],how='left').merge(df_r[['xitem','xyear','rqty']],on=['xitem','xyear'],how='left').fillna(0)
-
-# %%
-# df_hmbr_g_h = df_cus.merge(df_sales_g_h[['xcus','xyear','xper','xsp','xlineamt']],on=['xcus'],how='left').merge(df_return_g_h[['xcus','xyear','xper','xsp','totamt']],on=['xcus','xyear','xper','xsp'],how='left').fillna(0
-
-# %%
 df_master['eff_sale_qty'] = df_master['qty'] - df_master['rqty']
 df_master['eff_sale_amt'] = (df_master['totamt']/df_master['qty'])*df_master['eff_sale_qty']
 df_master['unit_cost'] = df_master['cost']/df_master['qty']
@@ -135,17 +128,15 @@ conditions = [
 choices = [50,100,200,400,700,1500,3000,3001]
 df_master['range'] = np.select(conditions,choices, default=0)
 
-# %%
+
 df_rev = df_master[df_master['range']!=0].pivot_table(['eff_sale_amt'],index='range',columns=['xyear'],aggfunc='sum').round(1).fillna(0)
 df_cost = df_master[df_master['range']!=0].pivot_table(['total_cost'],index='range',columns=['xyear'],aggfunc='sum').round(1).fillna(0)
 df_qty = df_master[df_master['range']!=0].pivot_table(['eff_sale_qty'],index='range',columns=['xyear'],aggfunc='sum').round(1).fillna(0)
 df_gp = df_master[df_master['range']!=0].pivot_table(['GP'],index='range',columns=['xyear'],aggfunc='sum').round(1).fillna(0)
 
-# %%
+
 # in the email attach excel reports for df_master, df_rev, df_cost, df_qty, df_gp , df_c , and df_y
 # Bashar also put df_c and df_y in the excel sheet. do this ASAP. 
-
-# %%
 
 # Define your DataFrames: df_master, df_rev, df_cost, df_qty, df_gp, df_c, df_y
 dataframes = {
@@ -168,16 +159,6 @@ for sheet_name, dataframe in dataframes.items():
 # Save the Excel file
 writer.save()
 
-
-
-
-recipient_emails = ['ithmbrbd@gmail.com', ]
-
-# Email content
-subject = 'Zepto Sales before run profit and Loss'
-body = 'Please find attached the files you requested.'
-
-
 # === Email ===
 
 try:
@@ -190,32 +171,30 @@ except Exception as e:
     recipients = ["ithmbrbd@gmail.com"]  # Fallback
 
 
-
 body_text = """
-    <h4> Dear Sir, </h4>
-    <p>Please find the attached Excel/embeed HTML containing the subjective information.</p>
+    Dear Sir,
+    Please find the attached Excel/embeed HTML containing the subjective information
 
-    <p><b>Best Regards,</b></p>
-    <p>Automated Reporting System</p>
+    Best Regards,
+    Automated Reporting System
 """
 
 send_mail(
     subject="HM_29_1: Zepto Sales before run profit and Loss",
     bodyText=body_text,
     attachment= ['zepto_sales_p.xlsx'],
-    recipient=recipients,
+    recipient=recipients
 
 )
 print("📧 Email sent successfully")
 
 engine.dispose()
-# Attachments
+print("✅ Process completed")
 
 
 
 
 
-# %%
 
 
 
