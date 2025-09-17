@@ -207,12 +207,16 @@ wb.save(ar_excel_file)
 
 
 # === 10. Send Receivable Email ===
+
 try:
-    recipients = get_email_recipients("HM_01_Acct_Rec")
-    print(f"📬 Receivable recipients: {recipients}")
+    # Extract report name from filename
+    report_name = os.path.splitext(os.path.basename(__file__))[0]
+    recipients = get_email_recipients('HM_01_Acct_Rec')
+    print(f"📬 Recipients: {recipients}")
 except Exception as e:
-    print(f"⚠️ Fallback: {e}")
-    recipients = ["ithmbrbd@gmail.com"]
+    print(f"⚠️ Failed to fetch recipients: {e}")
+    recipients = ["ithmbrbd@gmail.com"]  # Fallback
+
 
 # Prepare HTML tables
 html_df_list_rec = [

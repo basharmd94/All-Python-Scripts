@@ -53,14 +53,14 @@ def get_data(zid,):
     """
     return pd.read_sql(query, engine, params=[zid, ])
 
-
+ 
 
 # === Email ===
 
 try:
     # Extract report name from filename
     report_name = os.path.splitext(os.path.basename(__file__))[0]
-    recipients = ["ithmbrbd@gmail.com"] 
+    recipients = get_email_recipients(report_name)
     print(f"📬 Recipients: {recipients}")
 except Exception as e:
     print(f"⚠️ Failed to fetch recipients: {e}")
