@@ -27,9 +27,6 @@ import warnings
 
 # === Load Environment & Config ===
 load_dotenv()
-ZID_HMBR = int(os.environ["ZID_GULSHAN_TRADING"])
-ZID_GI = int(os.environ["ZID_GI"])
-ZID_ZEPTO = int(os.environ["ZID_ZEPTO_CHEMICALS"])  # Zepto business
 
 PROJECT_ROOT = os.path.dirname(os.getcwd())
 if PROJECT_ROOT not in sys.path:
