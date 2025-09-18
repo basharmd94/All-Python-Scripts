@@ -120,3 +120,7 @@ def send_mail(subject, bodyText, attachment=[], recipient=None, html_body=None):
         print("? Email sent successfully!")
     except Exception as e:
         print(f"? Failed to send email: {e}")
+
+
+
+    

@@ -43,12 +43,6 @@ from dateutil.relativedelta import relativedelta
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
-
 # ─────────────────────────────────────────────────────────────────────
 # 1. Load Environment & Setup
 # ─────────────────────────────────────────────────────────────────────
@@ -72,21 +66,21 @@ if PROJECT_ROOT not in sys.path:
 
 # Load DATABASE_URL from project_config
 from project_config import DATABASE_URL
+from mail import send_mail, get_email_recipients
+
+engine = create_engine(DATABASE_URL)
 
 
 def get_cus(zid):
-    engine = create_engine(DATABASE_URL)
     df = pd.read_sql("""SELECT cacus.xcus,cacus.xshort,cacus.xadd2, cacus.xcity,cacus.xstate FROM cacus WHERE zid = '%s'""" % (zid), con=engine)
     return df
 
 def get_item(zid):
-    engine = create_engine(DATABASE_URL)
     df = pd.read_sql("""SELECT caitem.xitem,caitem.xdesc FROM caitem WHERE zid = '%s' AND xgitem = 'Industrial & Household'""" % (zid), con=engine)
     return df
 
 def get_sales(zid, year, month):
     date = str(year) + '-' + str(month) + '-' + '01'
-    engine = create_engine(DATABASE_URL)
     df = pd.read_sql("""SELECT imtrn.xcus,imtrn.xitem, imtrn.xyear, imtrn.xper, imtrn.xdate , imtrn.xqty,
      imtrn.xdoctype ,imtrn.xdocnum, opddt.xrate , (opddt.xdtwotax - opddt.xdtdisc) as xdtwotax,  opdor.xdiscamt, opdor.xtotamt, opdor.xsp
                     FROM imtrn
@@ -103,7 +97,6 @@ def get_sales(zid, year, month):
 
 def get_return(zid, year, month):
     date = str(year) + '-' + str(month) + '-' + '01'
-    engine = create_engine(DATABASE_URL)
     df = pd.read_sql("""SELECT imtrn.xcus, imtrn.xitem, imtrn.xyear, imtrn.xper, imtrn.xdate,imtrn.xqty, opcdt.xrate, (opcdt.xrate*imtrn.xqty) as totamt, imtrn.xdoctype ,imtrn.xdocnum, opcrn.xemp
                         FROM imtrn 
                         JOIN opcdt
@@ -120,7 +113,6 @@ def get_return(zid, year, month):
 
 def get_acc_receivable(zid, proj, year, month):
     year_month = str(year) + str(month)
-    engine = create_engine(DATABASE_URL)
     df = pd.read_sql("""SELECT gldetail.xsub,cacus.xshort,cacus.xadd2,cacus.xcity,cacus.xstate,SUM(gldetail.xprime) as AR
                         FROM glheader
                         JOIN gldetail
@@ -138,7 +130,6 @@ def get_acc_receivable(zid, proj, year, month):
 
 def get_acc_payable(zid, proj, year, month):
     year_month = str(year) + str(month)
-    engine = create_engine(DATABASE_URL)
     df = pd.read_sql("""SELECT gldetail.xsub,casup.xshort,SUM(gldetail.xprime) as AP
                         FROM glheader
                         JOIN gldetail
@@ -155,13 +146,11 @@ def get_acc_payable(zid, proj, year, month):
     return df
 
 def get_employee(zid):
-    engine = create_engine(DATABASE_URL)
     df = pd.read_sql("""SELECT xemp,xname,xdept,xdesig,xstatusemp FROM prmst WHERE zid = '%s'""" % (zid), con=engine)
     return df
 
 def get_purchase(zid, year, month):
     date = str(year) + '-' + str(month) + '-' + '01'
-    engine = create_engine(DATABASE_URL)
     df = pd.read_sql("""SELECT imtrn.zid, imtrn.xitem, imtrn.xyear, imtrn.xper, caitem.xdesc,caitem.xgitem, SUM(imtrn.xval) AS Purchase
                                     FROM imtrn
                                     JOIN caitem
@@ -255,7 +244,7 @@ df_7.at[len(df_7.index) - 1, 'xcity'] = 'Rahima Enterprise'
 df_7 = df_7[df_7['xcity'] == 'Rahima Enterprise']
 
 df_f = df_1.append(df_2).append(df_3).append(df_4).append(df_5).append(df_6).append(df_7).drop(['index', 'xcus', 'xsp', 'businessId', 'xshort'], axis=1).reset_index().drop(['index'], axis=1)
-df_f.loc[len(df_f.index), :] = df_f.sum(axis=0, numeric_only=True)
+df_f.loc[len(df_f.index), :] = df_f.sum(axis=0, numeric_only=True).reset_index(drop=True)
 df_f.at[len(df_f.index) - 1, 'xcity'] = 'Total'
 
 # Accounts Receivable
@@ -351,68 +340,65 @@ df_j.loc[len(df_j.index), :] = df_j.sum(axis=0, numeric_only=True)
 df_j.at[len(df_j.index) - 1, 'xdesc'] = 'Total'
 
 # Export to Excel with HM_25 prefix
-writer2 = pd.ExcelWriter('HM_25_Zepto_Overall_Details.xlsx')
-df_zepto.to_excel(writer2, "zepto")
-df_acc_z.to_excel(writer2, "accountZepto")
-df_item.to_excel(writer2, "itemZepto")
-df_purchase.to_excel(writer2, "purchaseZepto")
-df_ap.to_excel(writer2, "zeptoPayable")
-writer2.save()
-writer2.close()
 
-# Generate HTML file for email (same as original)
-HEADER = '''
-<html>
-    <head>
-    </head>
-    <body>
-'''
 
-FOOTER = '''
-    </body>
-</html>
-'''
+# Export to Excel with HM_25 prefix with function
+with pd.ExcelWriter('HM_25_Zepto_Overall_Details.xlsx') as writer2:
+    df_zepto.to_excel(writer2, "zepto")
+    df_acc_z.to_excel(writer2, "accountZepto")
+    df_item.to_excel(writer2, "itemZepto")
+    df_purchase.to_excel(writer2, "purchaseZepto")
+    df_ap.to_excel(writer2, "zeptoPayable")
 
-with open("index.html", 'w') as f:
-    f.write(HEADER)
-    f.write("<h2 style='color:red;'>Zepto Sales</h2>")
-    f.write(df_f.to_html(classes='df_f'))
-    f.write("<h2 style='color:red;'>Zepto Account Receivable</h2>")
-    f.write(df_ar.to_html(classes='df_ar'))
-    f.write("<h2 style='color:red;'>Zepto Item Sales</h2>")
-    f.write(df_i.to_html(classes='df_i'))
-    f.write("<h2 style='color:red;'>Zepto Item Purchase</h2>")
-    f.write(df_j.to_html(classes='df_j'))
-    f.write("<h2 style='color:red;'>Zepto Payable</h2>")
-    f.write(df_zp.to_html(classes='df_zp'))
-    f.write(FOOTER)
+OUTPUT_FILE = 'HM_25_Zepto_Overall_Details.xlsx'
 
-# Send email (same SMTP method as original)
-me = "pythonhmbr12@gmail.com"
-you = ["ithmbrbd@gmail.com"]
+# remove timeline column from all df
+df_f.columns.name = None
+df_ar.columns.name = None
+df_i.columns.name = None
+df_j.columns.name = None
+df_zp.columns.name = None
 
-msg = MIMEMultipart('alternative')
-msg['Subject'] = "HM_25 – Zepto Overall Business Summary"
-msg['From'] = me
-msg['To'] = ", ".join(you)
 
-filename = "index.html"
-with open(filename) as f:
-    attachment = MIMEText(f.read(), 'html')
-msg.attach(attachment)
+html_body_list = [
+        (df_f, 'Zepto Sales'),
+        (df_ar, 'Zepto Account Receivable'),
+        (df_i, 'Zepto Item Sales'),
+        (df_j, 'Zepto Item Purchase'),
+        (df_zp, 'Zepto Payable'),
+      ]
+try:
+    # Extract report name from filename
+    report_name = os.path.splitext(os.path.basename(__file__))[0]
+    print(report_name)
+    recipients = get_email_recipients(report_name)
+    print(f"📬 Recipients: {recipients}")
+except Exception as e:
+    print(f"⚠️ Failed to fetch recipients: {e}")
+    recipients = ["ithmbrbd@gmail.com"]  # Fallback
 
-part1 = MIMEBase('application', "octet-stream")
-with open("HM_25_Zepto_Overall_Details.xlsx", "rb") as f:
-    part1.set_payload(f.read())
-encoders.encode_base64(part1)
-part1.add_header('Content-Disposition', 'attachment; filename="HM_25_Zepto_Overall_Details.xlsx"')
-msg.attach(part1)
 
-username = 'pythonhmbr12'
-password = 'vksikttussvnbqef'
+subject = f"HM_25 Zepto overall details"
+body_text = f"""
+<p>Dear Sir,</p>
+<p>Please find the attachment/HTML Embeded <strong>Improve</strong> version of the subjective report.</p>
 
-s = smtplib.SMTP('smtp.gmail.com:587')
-s.starttls()
-s.login(username, password)
-s.sendmail(me, you, msg.as_string())
-s.quit()
+<p>Best regards,<br>
+Automated Reporting System</p>
+"""
+# Send email
+try:
+    send_mail(
+        subject=subject,
+        bodyText=body_text,
+        attachment=[OUTPUT_FILE],
+        recipient=recipients,
+        html_body=html_body_list
+    )
+    print("✅ Email sent successfully.")
+except Exception as e:
+    print(f"❌ Failed to send email: {e}")
+    raise
+
+engine.dispose()
+print ("✅ Database connection closed. Process Completed")
