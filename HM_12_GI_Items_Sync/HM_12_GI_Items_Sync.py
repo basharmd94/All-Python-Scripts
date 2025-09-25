@@ -58,18 +58,18 @@ if __name__ == "__main__":
     refresh_materialized_view()
 
     # Send success email
-    try:
-        recipients = get_email_recipients(os.path.splitext(os.path.basename(__file__))[0])
-        print(f"📬 Success email to: {recipients}")
-    except Exception as e:
-        print(f"⚠️ Fallback: {e}")
-        recipients = ["ithmbrbd@gmail.com"]
+    # try:
+        # recipients = get_email_recipients(os.path.splitext(os.path.basename(__file__))[0])
+        # print(f"📬 Success email to: {recipients}")
+    # except Exception as e:
+        # print(f"⚠️ Fallback: {e}")
+        # recipients = ["ithmbrbd@gmail.com"]
 
-    send_mail(
-        subject="HM_12 Sync Completed",
-        bodyText="The materialized view 'final_items_view' has been successfully refreshed.",
-        attachment=[],
-        recipient=recipients
-    )
+    # send_mail(
+        # subject="HM_12 Sync Completed",
+        # bodyText="The materialized view 'final_items_view' has been successfully refreshed.",
+        # attachment=[],
+        # recipient=recipients
+    # )
 
     print("✅ HM_12: Sync Completed & email sent.")

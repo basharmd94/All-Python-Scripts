@@ -2,20 +2,35 @@ from sqlalchemy import create_engine
 import pandas as pd
 import numpy as np
 from datetime import date,datetime,timedelta
-import psycopg2
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
 import openpyxl
-from dateutil.relativedelta import relativedelta
 import random
 import os
 import datetime
 import shutil
 import re
-from mail import send_mail
+# use Project config
+from dotenv import load_dotenv
+from sqlalchemy import text  # ← Required for parameterized queries with SQLAlchemy
+import sys
+
+# ─────────────────────────────────────────────────────────────────────
+# 🌍 1. Load Environment & Setup
+# ─────────────────────────────────────────────────────────────────────
+load_dotenv()
+
+# ─────────────────────────────────────────────────────────────────────
+# 🧩 2. Add Root & Import Shared Modules
+# ─────────────────────────────────────────────────────────────────────
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from project_config import engine
+from mail import send_mail, get_email_recipients
+
+
+
 
 logs = {}
 
@@ -38,7 +53,6 @@ def rand_cust(start,end,num, total_chl):
     return res
 
 def get_sales(zid,date):
-    engine = create_engine('postgresql://postgres:postgres@localhost:5432/da')
     df = pd.read_sql("""SELECT imtrn.xcus,cacus.xshort,cacus.xadd1,cacus.xadd2, imtrn.xyear, imtrn.xper, imtrn.xdate
                         FROM imtrn
                         JOIN cacus
@@ -531,5 +545,9 @@ file_list = os.listdir(email_folder)
 file_list = [email_folder + "/" + i for i in file_list]
 
 # send all file attached with email
-send_mail(f"vat analysis of {today_strf_date}", "please see the attachment", attachment=file_list, recipient = ['ithmbrbd@gmail.com','financecorp01@gmail.com'])
+send_mail(
+f"HM_30 vat analysis of {today_strf_date}",
+ "please see the attachment",
+attachment=file_list,
+recipient = ['ithmbrbd@gmail.com','financecorp01@gmail.com'])
 ##process emails for the chl_df excel files & the item_df/itemledger sheet excel file to milon after processing

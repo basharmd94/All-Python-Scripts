@@ -1,16 +1,6 @@
-from sqlalchemy import create_engine
 import pandas as pd
 import numpy as np
-from datetime import date,datetime,timedelta
-import psycopg2
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
 import openpyxl
-
-from dateutil.relativedelta import relativedelta
 import random
 
 def rand(start, end, num, total_sales):

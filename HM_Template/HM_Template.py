@@ -78,44 +78,6 @@ def get_inventory_value_by_warehouse(zid: int, as_of_date: str):
     })
 
 
-# ─────────────────────────────────────────────────────────────────────
-# 📊 5. Generate Monthly Inventory Report
-# ─────────────────────────────────────────────────────────────────────
-print("📊 Generating monthly inventory value report...")
-
-with pd.ExcelWriter(OUTPUT_FILE, engine="xlsxwriter") as writer:
-    for zid, business_name in ZID_MAP.items():
-        print(f"📊 Processing: {business_name} (ZID={zid})")
-        monthly_data = []
-
-        for month in range(1, CURRENT_MONTH + 1):
-            last_day = last_day_of_month(YEAR, month)
-            query_date = f"{YEAR}-{month:02d}-{last_day}"
-            month_label = f"{calendar.month_name[month]}-{str(YEAR)[-2:]}"
-
-            # Fetch data using reusable function
-            try:
-                df_month = get_inventory_value_by_warehouse(zid=zid, as_of_date=query_date)
-                df_month.rename(columns={"value": month_label}, inplace=True)
-            except Exception as e:
-                print(f"❌ Error fetching data for {business_name}, month {month}: {e}")
-                df_month = pd.DataFrame(columns=["xwh", month_label])
-
-            if month == 1:
-                monthly_data = df_month
-            else:
-                monthly_data = pd.merge(monthly_data, df_month, on="xwh", how="outer")
-
-        # Clean up: fill NaN with 0
-        monthly_data.fillna(0, inplace=True)
-
-        # Excel-safe sheet name (max 31 chars)
-        safe_sheet_name = business_name[:31]
-
-        # Write to Excel sheet
-        monthly_data.to_excel(writer, sheet_name=safe_sheet_name, index=False)
-
-print(f"✅ Inventory report saved: {OUTPUT_FILE}")
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -127,45 +89,22 @@ try:
     # Extract report name from filename
     report_name = os.path.splitext(os.path.basename(__file__))[0]
     print(report_name)
-    recipients = get_email_recipients(report_name)
+    # recipients = get_email_recipients(report_name)
+    recipients = ["ithmbrbd@gmail.com"]  # Fallback
     print(f"📬 Recipients: {recipients}")
 except Exception as e:
     print(f"⚠️ Failed to fetch recipients: {e}")
     recipients = ["ithmbrbd@gmail.com"]  # Fallback
 
 
-subject = f"HM_28 – Inventory Value by Warehouse ({YEAR})"
-
-# HTML Email Body
-business_list = "".join(f"<li><strong>{name}</strong> (ZID={zid})</li>" for zid, name in ZID_MAP.items())
-
-body_text = f"""
-<p>Dear Sir,</p>
-<p>Please find the <strong>Monthly Inventory Value Report by Warehouse (xwh)</strong> attached.</p>
-<p><strong>Period:</strong> January to {calendar.month_name[CURRENT_MONTH]} {YEAR}</p>
-<p><strong>Businesses Included:</strong></p>
-<ul>
-{business_list}
-</ul>
-<p>The report shows monthly closing inventory values grouped by warehouse (xwh).</p>
-<p>Best regards,<br>
-Automated Reporting System</p>
-"""
-
-# Optional: Add summary tables in HTML
-html_content = []
-for name in ZID_MAP.values():
-    summary_df = pd.DataFrame({"Business": [name], "Status": ["Report Included"]})
-    html_content.append((summary_df, f"Summary: {name}"))
+subject = f"HM_28 – Inventory Value by Warehouse"
 
 # Send email
 try:
     send_mail(
         subject=subject,
-        bodyText=body_text,
-        attachment=[OUTPUT_FILE],
+        bodyText="Hello this is test",
         recipient=recipients,
-        html_body=html_content
     )
     print("✅ Email sent successfully.")
 except Exception as e:
