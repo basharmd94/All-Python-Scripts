@@ -498,20 +498,21 @@ for key,value in chl_dict_final.items():
         key = key.strip()
         key = key[0:20]
         key = key.replace("/" , "")
-
-    with pd.ExcelWriter('all_challan/challan_' + "_" + key + '-' + manual_date + '.xlsx') as writer:
+# at first excel name start with challan then _ then manual_date _ then key
+    with pd.ExcelWriter('all_challan/challan_' + "_" + manual_date + "_" + key + '_'  + '.xlsx') as writer:
         value[0].to_excel(writer,sheet_name=key+manual_date,startrow=0,startcol=0)
         value[1].to_excel(writer,sheet_name=key+manual_date,startrow=0,startcol=10)
         value[2].to_excel(writer,sheet_name=key+manual_date,startrow=8,startcol=0)
 ################### this command is for save the excel files in email folder dirctory ###
-    with pd.ExcelWriter(f'{email_folder}/challan_' + "_" + key + '-' + manual_date + '.xlsx') as writer:
+    with pd.ExcelWriter(f'{email_folder}/challan_' + "_" + manual_date + "_" + key + '_'  + '.xlsx') as writer:
         value[0].to_excel(writer,sheet_name=key+manual_date,startrow=0,startcol=0)
         value[1].to_excel(writer,sheet_name=key+manual_date,startrow=0,startcol=10)
         value[2].to_excel(writer,sheet_name=key+manual_date,startrow=8,startcol=0)
 
 
 #save these files into email folder for sending specific days mail
-with pd.ExcelWriter('chl_value_list.xlsx') as writer:  
+challan_value_excel = f"{today_strf_date}_chl_value_list.xlsx"
+with pd.ExcelWriter(challan_value_excel) as writer:  
     chl_value_df.to_excel(writer, sheet_name='chl_value_list')
     chl_count_df.to_excel(writer, sheet_name='chl_count_list')
     chl_sum_df.to_excel(writer,sheet_name='chl_count_sum')
@@ -519,8 +520,8 @@ with pd.ExcelWriter('chl_value_list.xlsx') as writer:
     month_df.to_excel(writer,sheet_name='vat_analysis')
 
 # copy challan value list to email folder
-source = 'chl_value_list.xlsx'
-destination = f'{email_folder}/chl_value_list.xlsx'
+source = challan_value_excel
+destination = f'{email_folder}/{challan_value_excel}'
 shutil.copy(source, destination)
 # copy log.txt to email folder
 
