@@ -39,9 +39,9 @@ from project_config import DATABASE_URL
 # ────────────────────────────────────────────────────────────────────
 LOG_DIR  = "count_logs"          # JSON history root
 POOL_N   = 200                   # top-N by stockvalue before sampling
-ITEMS_PER_ZID = 5                # FG: items per chosen zid
-ZIDS_PER_DAY  = 3                # FG: zids per day
-RAW_ITEMS_PER_DAY = 10           # RAW: items per scheduled group/day
+ITEMS_PER_ZID = 2                # FG: items per chosen zid
+ZIDS_PER_DAY  = 2                # FG: zids per day
+RAW_ITEMS_PER_DAY = 3           # RAW: items per scheduled group/day
 SKIP_DAYS = {"Friday"}           # set() to include Fridays
 
 # One person for all businesses, every day

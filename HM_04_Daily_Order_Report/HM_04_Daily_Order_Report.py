@@ -128,7 +128,8 @@ def main():
     df_gicorp = fetch_order_data(COMPANY_ZIDS['GICORP'], TODAY_DATE)
 
     # Apply sorting
-    df_hmbr_sorted = sort_hmbr_by_priority(df_hmbr)
+    # df_hmbr_sorted = sort_hmbr_by_priority(df_hmbr)
+    df_hmbr_sorted = df_hmbr.sort_values('total_value', ascending=False).reset_index(drop=True)
     df_zepto_sorted = df_zepto.sort_values('total_value', ascending=False).reset_index(drop=True)
     df_gicorp_sorted = df_gicorp.sort_values('total_value', ascending=False).reset_index(drop=True)
 
